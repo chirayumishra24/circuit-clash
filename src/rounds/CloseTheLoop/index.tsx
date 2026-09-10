@@ -56,6 +56,19 @@ export function CloseTheLoop() {
   const solvedCountRef = useRef(0)
   const solvedRef = useRef(false)
 
+  function advanceLevel() {
+    if (levelIndex + 1 < PUZZLES.length) {
+      const nextIdx = levelIndex + 1
+      setLevelIndex(nextIdx)
+      setCells(cloneCells(PUZZLES[nextIdx].cells))
+      setHintAt(null)
+      solvedRef.current = false
+      setPhase('play')
+    } else {
+      endTurn(remainingRef.current)
+    }
+  }
+
   useEffect(() => {
     if (phase !== 'play') return
     if (!result.closed || solvedRef.current) return
@@ -72,21 +85,17 @@ export function CloseTheLoop() {
     solvedCountRef.current += 1
     setSolvedCount(solvedCountRef.current)
     setPhase('solved')
-
-    const t = window.setTimeout(() => {
-      if (levelIndex + 1 < PUZZLES.length) {
-        setLevelIndex((i) => i + 1)
-        setCells(cloneCells(PUZZLES[levelIndex + 1].cells))
-        setHintAt(null)
-        solvedRef.current = false
-        setPhase('play')
-      } else {
-        endTurn(remainingRef.current)
-      }
-    }, 1600)
-    return () => window.clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result.closed, phase])
+
+  useEffect(() => {
+    if (phase !== 'solved') return
+    const t = window.setTimeout(() => {
+      advanceLevel()
+    }, 3000)
+    return () => window.clearTimeout(t)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, levelIndex])
 
   function endTurn(secondsLeft: number) {
     const bonus = Math.min(SPEED_BONUS_CAP, Math.round(secondsLeft))
@@ -295,13 +304,23 @@ export function CloseTheLoop() {
               </h4>
             </div>
 
-            <button
-              onClick={useHint}
-              disabled={phase !== 'play'}
-              className="clay-btn bg-white hover:bg-slate-50 border border-slate-200 px-4 py-1.5 text-xs font-black text-slate-700 shadow-sm disabled:opacity-40"
-            >
-              🔍 Hint (−{POINTS.loop.hintPenalty})
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={useHint}
+                disabled={phase !== 'play'}
+                className="clay-btn bg-white hover:bg-slate-50 border border-slate-200 px-3.5 py-1.5 text-xs font-black text-slate-700 shadow-sm disabled:opacity-40 cursor-pointer"
+              >
+                🔍 Hint (−{POINTS.loop.hintPenalty})
+              </button>
+              <button
+                onClick={() => endTurn(remainingRef.current)}
+                disabled={phase !== 'play'}
+                className="clay-btn bg-slate-100 hover:bg-slate-200 border border-slate-300 px-3 py-1.5 text-xs font-black text-slate-600 shadow-sm disabled:opacity-40 cursor-pointer"
+                title={turn === 0 ? 'End turn early and hand over to Team Ampere' : 'End turn early and view results'}
+              >
+                ⏭ End Turn Early
+              </button>
+            </div>
           </div>
 
           {/* Breadboard Grid Well */}
@@ -327,16 +346,39 @@ export function CloseTheLoop() {
               )}
             </div>
 
-            {/* Celebratory Victory Medal Popup */}
+            {/* Celebratory Victory Medal Popup with Direct Smart Board Click Button */}
             {phase === 'solved' && (
-              <div className="pop-in absolute inset-0 grid place-items-center bg-slate-900/40 backdrop-blur-xs rounded-3xl z-30">
-                <div className="clay-card border-4 border-emerald-400 bg-white px-10 py-6 text-center shadow-[0_24px_48px_rgba(16,185,129,0.35)]">
+              <div className="pop-in absolute inset-0 grid place-items-center bg-slate-900/40 backdrop-blur-xs rounded-3xl z-30 p-4">
+                <div className="clay-card border-4 border-emerald-400 bg-white px-8 py-6 text-center shadow-[0_24px_48px_rgba(16,185,129,0.35)] max-w-sm w-full">
                   <div className="text-5xl animate-bounce">💡</div>
-                  <div className="mt-2 font-display text-3xl font-black text-emerald-600">
+                  <div className="mt-2 font-display text-2xl font-black text-emerald-600">
                     CIRCUIT CLOSED!
                   </div>
-                  <div className="mt-2 inline-block rounded-full bg-emerald-100 px-5 py-1.5 font-display text-sm font-black text-emerald-800 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)]">
+                  <div className="mt-1.5 inline-block rounded-full bg-emerald-100 px-4 py-1 font-display text-sm font-black text-emerald-800 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)]">
                     +{POINTS.loop.solve} PTS
+                  </div>
+
+                  <div className="mt-5">
+                    <button
+                      type="button"
+                      onClick={advanceLevel}
+                      className="clay-btn w-full bg-emerald-500 hover:bg-emerald-600 text-white font-display text-sm font-black py-2.5 px-4 rounded-xl shadow-lg hover:scale-[1.02] active:scale-95 transition cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      {levelIndex + 1 < PUZZLES.length ? (
+                        <>
+                          <span>Next Circuit (Level {levelIndex + 2} of {PUZZLES.length})</span>
+                          <span>→</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Complete Turn & Hand Over Controls</span>
+                          <span>⚡</span>
+                        </>
+                      )}
+                    </button>
+                    <div className="mt-1.5 text-[10px] font-bold text-slate-400">
+                      Auto-advancing or tap above to jump in!
+                    </div>
                   </div>
                 </div>
               </div>

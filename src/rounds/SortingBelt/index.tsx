@@ -247,7 +247,7 @@ export function SortingBelt() {
       roundId="belt"
       activeTeam={teamId}
       headerRight={
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5 text-sm font-black">
             <span className="text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full shadow-xs">✔ {correct}</span>
             <span className="text-rose-700 bg-rose-100 px-3 py-1 rounded-full shadow-xs">✘ {wrong}</span>
@@ -257,6 +257,15 @@ export function SortingBelt() {
               </span>
             )}
           </div>
+          <button
+            type="button"
+            onClick={endTurn}
+            disabled={phase !== 'play'}
+            className="clay-btn bg-white hover:bg-slate-100 border border-slate-300 px-3 py-1 text-xs font-black text-slate-700 shadow-xs cursor-pointer disabled:opacity-40"
+            title={turn === 0 ? 'Finish turn early and hand over to Team Ampere' : 'Finish turn early and see results'}
+          >
+            ⏭ End Turn
+          </button>
           <Timer remaining={remaining} total={TURN_SECONDS} />
         </div>
       }
