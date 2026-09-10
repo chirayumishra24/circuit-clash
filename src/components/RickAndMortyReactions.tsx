@@ -1,13 +1,73 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../context/GameContext'
+import type { RoundId } from '../types'
 
-const SCIENCE_QUOTES = [
-  { char: 'Rick', text: '“Ohm’s Law, Morty! V = I × R! It’s the fundamental law of the universe!”' },
-  { char: 'Morty', text: '“Aw geez, Rick! Don’t put the ammeter straight across the battery!”' },
-  { char: 'Rick', text: '“Parallel branches get FULL voltage across every loop, you glip-glops!”' },
-  { char: 'Morty', text: '“Aw man, conductors let current flow, but insulators block it completely!”' },
-  { char: 'Rick', text: '“Wubba Lubba Dub Dub! That circuit was built with 100% pure genius!”' },
-]
+interface RoundTip {
+  roundId: RoundId
+  character: string
+  title: string
+  image: string
+  badge: string
+  tip: string
+  accentColor: string
+}
+
+const ROUND_TIPS: Record<RoundId, RoundTip> = {
+  loop: {
+    roundId: 'loop',
+    character: 'Rick Sanchez',
+    title: 'ROUND 1: CLOSED CIRCUIT LOOPS',
+    image: '/assets/rick_and_morty/rick_close_loop.jpg',
+    badge: '⚡ ZAP!',
+    tip: '“Listen up, Morty! Electricity only flows when there is an unbroken, continuous loop from battery (+) to (-)! Rotate the tiles to bridge every single gap!”',
+    accentColor: '#10b981',
+  },
+  build: {
+    roundId: 'build',
+    character: 'Rick Sanchez',
+    title: 'ROUND 2: SERIES VS PARALLEL BLUEPRINT',
+    image: '/assets/rick_and_morty/rick_blueprint.jpg',
+    badge: '📐 SCHEMATIC',
+    tip: '“Series circuits share voltage across bulbs and dim them down! Parallel circuits give EVERY branch full battery voltage! Check your target specs before wiring!”',
+    accentColor: '#0284c7',
+  },
+  ammeter: {
+    roundId: 'ammeter',
+    character: 'Morty Smith',
+    title: 'ROUND 3: AMMETERS GO IN SERIES',
+    image: '/assets/rick_and_morty/morty_shock.jpg',
+    badge: '⚠️ AW GEEZ!',
+    tip: '“Aw geez, Rick says NEVER connect an ammeter straight across the battery! Ammeters have near-zero resistance and will short out! Always wire it IN-LINE (series)!”',
+    accentColor: '#f59e0b',
+  },
+  belt: {
+    roundId: 'belt',
+    character: 'Rick & Morty',
+    title: 'ROUND 4: CONDUCTORS VS INSULATORS',
+    image: '/assets/rick_and_morty/rick_morty_bench.jpg',
+    badge: '🔬 ELECTRONS',
+    tip: '“Conductors like copper, aluminum, and brass have free sea of electrons that flow easily! Insulators like rubber and plastic block electron flow completely!”',
+    accentColor: '#8b5cf6',
+  },
+  sabotage: {
+    roundId: 'sabotage',
+    character: 'Rick Sanchez',
+    title: 'ROUND 5: CIRCUIT DIAGNOSTICS & REPAIR',
+    image: '/assets/rick_and_morty/rick_repair.jpg',
+    badge: '🔧 REPAIR',
+    tip: '“Trace current step-by-step, Morty! Don’t guess blindly! Look for opened knife switches, short-circuited paths, and burnt bulb filaments!”',
+    accentColor: '#ef4444',
+  },
+  lightning: {
+    roundId: 'lightning',
+    character: 'Rick Sanchez',
+    title: 'ROUND 6: BUZZER LOCK-IN & FINAL WAGER',
+    image: '/assets/rick_and_morty/rick_experiment.jpg',
+    badge: '⚡ HIGH VOLTAGE',
+    tip: '“Slap your on-screen team buzzer on the Smart Board to lock in first! Miss it, and opponents can steal! Save your stored charge for The Final Charge wager!”',
+    accentColor: '#f59e0b',
+  },
+}
 
 export function RickAndMortyReactions() {
   const { state } = useGame()
@@ -15,26 +75,37 @@ export function RickAndMortyReactions() {
     image: string
     title: string
     caption: string
-    type: 'surge' | 'shock' | 'victory'
   } | null>(null)
 
-  const [quoteIndex, setQuoteIndex] = useState(0)
-  const [showMascot, setShowMascot] = useState(true)
+  // Round Tip Pop-up State
+  const [isTipExpanded, setIsTipExpanded] = useState(true)
+  const [activeTipRound, setActiveTipRound] = useState<RoundId>('loop')
+  const prevRound = useRef<RoundId | null>(null)
 
   const voltStreak = state.teams.volt.streak
   const ampStreak = state.teams.ampere.streak
   const hasSurge = state.teams.volt.activeSurge || state.teams.ampere.activeSurge
 
-  // Watch for game situations
+  // Auto-pop the round tip whenever a new round starts or screen switches to round
+  useEffect(() => {
+    if (state.screen === 'round') {
+      setActiveTipRound(state.currentRound)
+      if (prevRound.current !== state.currentRound) {
+        setIsTipExpanded(true)
+        prevRound.current = state.currentRound
+      }
+    }
+  }, [state.screen, state.currentRound])
+
+  // Watch for Surge / Streak situational popups
   useEffect(() => {
     if (hasSurge || voltStreak >= 3 || ampStreak >= 3) {
       setActiveReaction({
         image: '/assets/rick_and_morty/rick_experiment.jpg',
         title: '⚡ 2× SURGE OVERLOAD!',
         caption: '“I turned myself into a high-voltage surge, Morty! 2X points!”',
-        type: 'surge',
       })
-      const t = window.setTimeout(() => setActiveReaction(null), 4500)
+      const t = window.setTimeout(() => setActiveReaction(null), 4000)
       return () => window.clearTimeout(t)
     }
   }, [hasSurge, voltStreak, ampStreak])
@@ -46,26 +117,29 @@ export function RickAndMortyReactions() {
         image: '/assets/rick_and_morty/rick_victory.jpg',
         title: '🏆 WUBBA LUBBA DUB DUB!',
         caption: '“Dimension C-137 Circuit Clash Champions!”',
-        type: 'victory',
       })
     }
   }, [state.screen])
 
-  const nextQuote = () => {
-    setQuoteIndex((prev) => (prev + 1) % SCIENCE_QUOTES.length)
-  }
+  const currentTip = ROUND_TIPS[activeTipRound] || ROUND_TIPS.loop
 
-  const currentQuote = SCIENCE_QUOTES[quoteIndex]
+  const cycleNextRoundTip = () => {
+    const roundIds: RoundId[] = ['loop', 'build', 'ammeter', 'belt', 'sabotage', 'lightning']
+    const idx = roundIds.indexOf(activeTipRound)
+    const nextId = roundIds[(idx + 1) % roundIds.length]
+    setActiveTipRound(nextId)
+    setIsTipExpanded(true)
+  }
 
   return (
     <>
-      {/* 1. Situation Reaction Popup Toast */}
+      {/* 1. Situation Streak / Surge Toast */}
       {activeReaction && (
         <div className="fixed top-20 right-6 z-50 animate-bounce pointer-events-none">
           <div className="clay-chassis flex items-center gap-4 bg-white/95 p-4 pr-6 shadow-2xl border-4 border-amber-400 rounded-3xl max-w-md">
             <img
               src={activeReaction.image}
-              alt="Rick and Morty Situation Reaction"
+              alt="Rick & Morty Situation Reaction"
               className="h-24 w-24 rounded-2xl object-cover shadow-md border-2 border-slate-900 shrink-0"
             />
             <div>
@@ -80,49 +154,77 @@ export function RickAndMortyReactions() {
         </div>
       )}
 
-      {/* 2. Laboratory Assistant Mascot Card (Bottom Left, toggleable) */}
-      {showMascot && state.screen !== 'setup' && (
-        <div className="fixed bottom-14 left-6 z-40 hidden md:block">
-          <div
-            onClick={nextQuote}
-            title="Click for Rick & Morty Science Advice"
-            className="clay-card group relative flex items-center gap-3 bg-white/95 p-3 pr-4 rounded-3xl border-2 border-emerald-300 shadow-xl cursor-pointer transition-all hover:scale-105 active:scale-95 select-none max-w-sm"
-          >
-            <div className="relative shrink-0">
-              <img
-                src="/assets/rick_and_morty/rick_morty_bench.jpg"
-                alt="Rick and Morty Lab"
-                className="h-14 w-14 rounded-2xl object-cover border-2 border-emerald-500 shadow-sm"
-              />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-white font-black animate-ping" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-[10px] text-white font-black">
-                💡
-              </span>
-            </div>
-
-            <div className="min-w-0">
-              <div className="flex items-center justify-between gap-1">
-                <span className="font-display text-xs font-black uppercase tracking-wider text-emerald-800">
-                  🔬 {currentQuote.char}'s Lab Note
+      {/* 2. Round-by-Round Rick & Morty Science Tip Card */}
+      {state.screen !== 'setup' && (
+        <div className="fixed bottom-4 left-5 z-40 max-w-md select-none transition-all">
+          {isTipExpanded ? (
+            /* Expanded Full Tip Card */
+            <div className="rise-in clay-card relative flex items-start gap-3.5 bg-white/98 p-4 rounded-3xl border-3 border-emerald-400 shadow-2xl">
+              {/* Character Avatar with Badge */}
+              <div className="relative shrink-0">
+                <img
+                  src={currentTip.image}
+                  alt={currentTip.character}
+                  className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-900 shadow-md"
+                />
+                <span className="absolute -top-2 -left-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] font-black uppercase text-white shadow-sm">
+                  {currentTip.badge}
                 </span>
-                <span className="text-[10px] text-slate-400 font-bold">TAP TO CYCLE</span>
               </div>
-              <p className="mt-0.5 text-xs font-bold text-slate-800 truncate max-w-[200px]">
-                {currentQuote.text}
-              </p>
-            </div>
 
+              {/* Tip Content */}
+              <div className="min-w-0 flex-1 pr-4">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-display text-[11px] font-black uppercase tracking-wider text-emerald-800">
+                    🔬 {currentTip.title}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-bold text-slate-900 leading-snug">
+                  {currentTip.tip}
+                </p>
+                <div className="mt-2.5 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={cycleNextRoundTip}
+                    className="clay-btn bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-xl text-[10px] font-black text-emerald-900 transition cursor-pointer"
+                  >
+                    Next Lab Tip ↻
+                  </button>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {currentTip.character}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dismiss / Minimize Button */}
+              <button
+                type="button"
+                onClick={() => setIsTipExpanded(false)}
+                className="absolute top-3 right-3 text-slate-400 hover:text-slate-800 text-sm font-black p-1 cursor-pointer transition"
+                title="Minimize Tip"
+              >
+                ✕
+              </button>
+            </div>
+          ) : (
+            /* Minimized Pill Mascot Icon */
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowMascot(false)
-              }}
-              className="text-slate-400 hover:text-slate-700 text-xs font-black px-1"
-              title="Dismiss Mascot"
+              type="button"
+              onClick={() => setIsTipExpanded(true)}
+              className="pop-in clay-btn flex items-center gap-2.5 rounded-full border-2 border-emerald-400 bg-white/95 px-3 py-1.5 shadow-lg hover:scale-105 transition cursor-pointer"
+              title="Show Round Lab Tip"
             >
-              ✕
+              <img
+                src={currentTip.image}
+                alt="Tip mascot"
+                className="h-8 w-8 rounded-full object-cover border border-emerald-500 shadow-xs"
+              />
+              <span className="font-display text-xs font-black text-emerald-950">
+                💡 {currentTip.character}'s Tip
+              </span>
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
             </button>
-          </div>
+          )}
         </div>
       )}
     </>
