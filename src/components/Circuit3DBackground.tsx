@@ -113,9 +113,10 @@ export function Circuit3DBackground() {
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0xf1f5f9)
 
-    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 100)
-    camera.position.set(0, 8.5, 13)
-    camera.lookAt(0, -0.4, 0)
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100)
+    camera.up.set(0, 0, -1)
+    camera.position.set(0, 15.5, 0.01)
+    camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(width, height)
@@ -513,9 +514,10 @@ export function Circuit3DBackground() {
       frameId = requestAnimationFrame(animate)
       const t = clock.getElapsedTime()
 
-      // Extremely subtle, smooth breathing tilt so 3D depth of wires & pins is tangible
-      boardGroup.rotation.y = Math.sin(t * 0.35) * 0.03
-      boardGroup.rotation.x = Math.cos(t * 0.25) * 0.015
+      // Subtle micro-sway that preserves the overhead top-down orientation
+      boardGroup.rotation.x = 0
+      boardGroup.rotation.y = 0
+      boardGroup.rotation.z = Math.sin(t * 0.25) * 0.006
 
       renderer.render(scene, camera)
     }
@@ -526,10 +528,18 @@ export function Circuit3DBackground() {
       if (!container) return
       const w = container.clientWidth || window.innerWidth
       const h = container.clientHeight || window.innerHeight
-      camera.aspect = w / h
+      const aspect = w / h
+      camera.aspect = aspect
+      if (aspect < 1.4) {
+        camera.position.y = 15.5 * (1.4 / Math.max(0.6, aspect))
+      } else {
+        camera.position.y = 15.5
+      }
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
     }
+
+    handleResize()
 
     window.addEventListener('resize', handleResize)
 
