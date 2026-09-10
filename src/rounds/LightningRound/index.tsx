@@ -259,8 +259,20 @@ export function LightningRound() {
 
             <div className="mt-3 min-h-[64px] text-center">
               {revealing ? (
-                <div className="rise-in">
-                  <p className="mx-auto max-w-xl text-sm font-bold text-slate-700">💡 {question.explain}</p>
+                <div className="rise-in flex flex-col items-center">
+                  <div className="flex items-center gap-3 max-w-xl text-left bg-slate-50 p-3.5 rounded-2xl border-2 border-slate-200 shadow-sm">
+                    <img
+                      src={picked === question.answer ? '/assets/rick_and_morty/rick_experiment.jpg' : '/assets/rick_and_morty/morty_shock.jpg'}
+                      alt="Rick & Morty reaction"
+                      className="h-14 w-14 rounded-xl object-cover border border-slate-900 shadow-xs shrink-0"
+                    />
+                    <div>
+                      <span className="font-display text-xs font-black uppercase text-slate-800">
+                        {picked === question.answer ? '🧪 Rick: Correct!' : '⚠️ Morty: Aw Geez!'}
+                      </span>
+                      <p className="text-sm font-bold text-slate-700">💡 {question.explain}</p>
+                    </div>
+                  </div>
                   <Button className="mt-3" size="lg" onClick={nextQuestion}>
                     {qIndex + 1 < questions.length ? 'Next Question →' : 'On To The Final Charge Wager →'}
                   </Button>

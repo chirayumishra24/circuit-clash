@@ -13,6 +13,8 @@ import { SabotageRepair } from './rounds/SabotageRepair'
 import { Circuit3DBackground } from './components/Circuit3DBackground'
 import { ArcadeUtilityBar } from './components/ArcadeUtilityBar'
 import { CelebrationToast } from './components/CelebrationToast'
+import { RickAndMortyReactions } from './components/RickAndMortyReactions'
+import { useBackgroundMusic } from './hooks/useBackgroundMusic'
 import type { RoundId } from './types'
 
 function Round({ id }: { id: RoundId }) {
@@ -34,6 +36,7 @@ function Round({ id }: { id: RoundId }) {
 
 export default function App() {
   const { state } = useGame()
+  useBackgroundMusic()
   const key = state.screen === 'round' ? `round-${state.currentRound}` : state.screen
 
   return (
@@ -55,6 +58,7 @@ export default function App() {
       {state.screen !== 'setup' && <HostBar />}
       <ArcadeUtilityBar />
       <CelebrationToast />
+      <RickAndMortyReactions />
     </div>
   )
 }

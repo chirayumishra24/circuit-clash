@@ -60,6 +60,17 @@ export function WinScreen() {
           <p className="mt-2 text-base font-bold text-slate-600">
             Congratulations to both teams for mastering electrical circuitry!
           </p>
+
+          <div className="mt-6 flex flex-col items-center justify-center">
+            <img
+              src="/assets/rick_and_morty/rick_victory.jpg"
+              alt="Rick Victory Wubba Lubba Dub Dub"
+              className="h-44 w-44 rounded-3xl object-cover border-4 border-emerald-400 shadow-2xl animate-pulse"
+            />
+            <span className="mt-2 font-display text-xs font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
+              WUBBA LUBBA DUB DUB · MASTER OF VOLTS & AMPS
+            </span>
+          </div>
         </div>
 
         <div className="mt-8 grid gap-5 sm:grid-cols-2">

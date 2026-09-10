@@ -83,8 +83,12 @@ export function CelebrationToast() {
 
   return (
     <div className="pointer-events-none fixed top-16 left-1/2 -translate-x-1/2 z-50">
-      <div className="pop-in flex items-center gap-3 rounded-3xl border-3 border-slate-900 bg-white px-7 py-3 shadow-[0_16px_36px_rgba(0,0,0,0.22)]">
-        <span className="text-4xl animate-bounce">{toast.badge}</span>
+      <div className="pop-in flex items-center gap-4 rounded-3xl border-3 border-slate-900 bg-white/95 px-6 py-3.5 shadow-[0_16px_36px_rgba(0,0,0,0.25)]">
+        <img
+          src="/assets/rick_and_morty/rick_experiment.jpg"
+          alt="Rick Surge"
+          className="h-16 w-16 rounded-2xl object-cover border-2 border-amber-500 shadow-md animate-pulse shrink-0"
+        />
         <div>
           <div className="font-display text-2xl font-black leading-none" style={{ color: toast.teamColor }}>
             {toast.title}

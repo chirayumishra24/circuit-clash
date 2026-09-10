@@ -24,7 +24,24 @@ export function SetupScreen() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+        {/* Dimension C-137 Lab Banner */}
+        <div className="rise-in mt-6 flex items-center gap-4 rounded-3xl border-2 border-emerald-300 bg-emerald-50/70 p-4 shadow-sm">
+          <img
+            src="/assets/rick_and_morty/rick_morty_bench.jpg"
+            alt="Rick and Morty Science Lab"
+            className="h-20 w-20 rounded-2xl object-cover border-2 border-emerald-500 shadow-md shrink-0"
+          />
+          <div>
+            <div className="font-display text-sm font-black uppercase tracking-wider text-emerald-900">
+              🧪 Dimension C-137 Laboratory Active
+            </div>
+            <p className="text-xs font-bold text-slate-700 mt-1">
+              “Listen to me, Morty! Electricity isn’t magic, it’s voltage pushing electrons through circuit loops! Name your squads and prepare for battle!”
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-5 sm:grid-cols-2">
           {TEAM_IDS.map((id, i) => {
             const theme = TEAM_THEME[id]
             const isVolt = id === 'volt'

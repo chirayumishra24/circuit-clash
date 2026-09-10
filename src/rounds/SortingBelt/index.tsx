@@ -305,14 +305,19 @@ export function SortingBelt() {
                 feedback.ok ? 'border-emerald-500' : 'border-rose-500'
               }`}
             >
-              <div>
+              <div className="flex flex-col items-center">
+                <img
+                  src={feedback.ok ? '/assets/rick_and_morty/rick_experiment.jpg' : '/assets/rick_and_morty/morty_shock.jpg'}
+                  alt="Reaction"
+                  className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-900 shadow-md mb-2"
+                />
                 <div className="font-display text-4xl font-black text-slate-950">
                   {feedback.ok ? '✔ Correct!' : '✘ Not quite!'} —{' '}
                   <span className={feedback.material.conductor ? 'text-emerald-700' : 'text-amber-700'}>
                     {feedback.material.conductor ? 'CONDUCTOR' : 'INSULATOR'}
                   </span>
                 </div>
-                <p className="mx-auto mt-3 max-w-md text-lg font-black text-slate-900">
+                <p className="mx-auto mt-2 max-w-md text-base font-black text-slate-900">
                   {feedback.material.why}
                 </p>
               </div>

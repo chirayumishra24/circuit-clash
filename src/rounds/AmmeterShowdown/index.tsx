@@ -215,10 +215,20 @@ export function AmmeterShowdown() {
 
             {revealing && chosen && (
               <div className="rise-in mt-6 text-center">
-                <div className={`mx-auto max-w-xl rounded-2xl p-4 text-sm font-bold shadow-sm ${
+                <div className={`mx-auto max-w-xl rounded-2xl p-4 text-sm font-bold shadow-sm flex items-center gap-3 text-left ${
                   chosen.correct ? 'bg-emerald-50 text-emerald-900 border-2 border-emerald-300' : 'bg-rose-50 text-rose-900 border-2 border-rose-300'
                 }`}>
-                  {chosen.correct ? '✔' : '✘'} {chosen.outcome}
+                  <img
+                    src={chosen.correct ? '/assets/rick_and_morty/rick_experiment.jpg' : '/assets/rick_and_morty/morty_shock.jpg'}
+                    alt="Reaction"
+                    className="h-14 w-14 rounded-xl object-cover border border-slate-900 shrink-0 shadow-sm"
+                  />
+                  <div>
+                    <div className="font-display text-xs font-black uppercase tracking-wide">
+                      {chosen.correct ? '⚡ Rick Approves:' : '⚠️ Aw Geez, Morty Alert:'}
+                    </div>
+                    <div>{chosen.correct ? '✔' : '✘'} {chosen.outcome}</div>
+                  </div>
                 </div>
                 <div className="mt-5">
                   <Button size="lg" onClick={nextAfterPlacement}>
