@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { BreadboardLeaderCircuit3D } from './BreadboardLeaderCircuit3D'
 import { POWER_UPS, TARGET_CHARGE, TEAM_THEME } from '../constants'
 import { useGame } from '../context/GameContext'
 import type { TeamId } from '../types'
@@ -144,17 +143,20 @@ function TeamPod({ teamId, active }: { teamId: TeamId; active: boolean }) {
 }
 
 export function Scoreboard({ activeTeam }: { activeTeam?: TeamId | null }) {
-  const { state } = useGame()
-
   return (
     <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
       <TeamPod teamId="volt" active={activeTeam === 'volt'} />
-      <BreadboardLeaderCircuit3D
-        voltScore={state.teams.volt.score}
-        ampScore={state.teams.ampere.score}
-        voltName={state.teams.volt.name}
-        ampName={state.teams.ampere.name}
-      />
+      <div className="grid shrink-0 place-items-center">
+        <div className="clay-card relative flex flex-col items-center justify-center h-14 w-14 rounded-2xl border-2 border-slate-200 shadow-lg bg-white/90">
+          <div className="font-display text-sm font-black bg-gradient-to-r from-amber-600 to-cyan-600 bg-clip-text text-transparent">
+            VS
+          </div>
+          <div className="mt-0.5 flex gap-1.5">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.8)]" />
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-500 shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+          </div>
+        </div>
+      </div>
       <TeamPod teamId="ampere" active={activeTeam === 'ampere'} />
     </div>
   )
