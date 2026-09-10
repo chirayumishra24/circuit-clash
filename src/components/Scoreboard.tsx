@@ -69,7 +69,7 @@ function TeamPod({ teamId, active }: { teamId: TeamId; active: boolean }) {
               )}
             </div>
             <div className="mt-1 flex items-center gap-2 text-xs font-bold" style={{ color: isVolt ? '#92400e' : '#0e7490' }}>
-              <span>KEY [{theme.key}]</span>
+              <span>⚡ BUZZER: {isVolt ? 'LEFT' : 'RIGHT'}</span>
               {team.streak >= 2 && (
                 <span className="rounded-full bg-orange-100 px-2 py-0.2 text-[11px] font-black text-orange-700">
                   🔥 {team.streak} STREAK

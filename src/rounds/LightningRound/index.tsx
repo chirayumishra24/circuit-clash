@@ -183,16 +183,14 @@ export function LightningRound() {
             <p className="mt-3 text-lg font-bold text-slate-700">
               {questions.length} rapid-fire buzzer questions, followed by <strong>The Final Charge</strong> wager!
             </p>
-            <div className="mx-auto mt-6 w-fit rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-3.5 text-left text-sm font-bold text-slate-800 shadow-sm">
-              <div className="flex items-center gap-3">
-                <kbd className="rounded-xl bg-amber-500 px-2 py-1 font-black text-white shadow-sm">[A]</kbd>
-                <span>{state.teams.volt.name} Buzzes</span>
+            <div className="mx-auto mt-6 w-fit rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-3.5 text-center text-sm font-bold text-slate-800 shadow-sm">
+              <div className="flex items-center justify-center gap-3">
+                <span className="rounded-xl bg-amber-500 px-2.5 py-1 font-black text-white shadow-sm">⚡ Left Buzzer: {state.teams.volt.name}</span>
                 <span className="text-slate-400">·</span>
-                <kbd className="rounded-xl bg-cyan-600 px-2 py-1 font-black text-white shadow-sm">[L]</kbd>
-                <span>{state.teams.ampere.name} Buzzes</span>
+                <span className="rounded-xl bg-cyan-600 px-2.5 py-1 font-black text-white shadow-sm">⚡ Right Buzzer: {state.teams.ampere.name}</span>
               </div>
               <div className="mt-2 text-xs font-bold text-slate-600">
-                Correct on buzzer: +{CORRECT_POINTS} pts · Missed buzzer: −{WRONG_PENALTY} pts (opponents get steal chance!)
+                Tap on-screen buzzers on the Smart Board to lock in! (+{CORRECT_POINTS} pts / −{WRONG_PENALTY} pts)
               </div>
             </div>
             <div className="mt-8">
@@ -275,10 +273,57 @@ export function LightningRound() {
                   ⚡ {state.teams[answering].name} buzzed in! Pick your answer!
                 </div>
               ) : (
-                <div className="font-display text-lg font-black text-slate-700">
-                  {lockedOut.length > 0 ? 'Opponent chance to steal!' : 'Buzz In Now:'}{' '}
-                  <kbd className="rounded-xl bg-amber-500 px-2 py-0.5 text-white">[A]</kbd>{' '}
-                  <kbd className="rounded-xl bg-cyan-600 px-2 py-0.5 text-white">[L]</kbd>
+                <div className="rise-in flex flex-col items-center gap-3">
+                  <div className="font-display text-sm md:text-base font-black uppercase tracking-wider text-slate-700">
+                    {lockedOut.length > 0 ? '⚡ OPPONENT STEAL CHANCE — TAP YOUR BUZZER!' : '⚡ TAP YOUR TEAM BUZZER TO LOCK IN!'}
+                  </div>
+                  <div className="grid w-full grid-cols-2 gap-4 pt-1">
+                    {/* Team Volt Smartboard Buzzer */}
+                    <button
+                      type="button"
+                      onClick={() => buzz('volt')}
+                      disabled={lockedOut.includes('volt')}
+                      style={{ touchAction: 'manipulation' }}
+                      className={`group relative flex flex-col items-center justify-center rounded-3xl p-5 md:p-6 transition-all active:scale-95 active:translate-y-1 select-none border-4 ${
+                        lockedOut.includes('volt')
+                          ? 'opacity-30 cursor-not-allowed bg-slate-200 border-slate-300 shadow-none'
+                          : 'cursor-pointer border-amber-300 bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white shadow-[0_12px_24px_rgba(217,119,6,0.45),inset_0_3px_6px_rgba(255,255,255,0.8),inset_0_-4px_6px_rgba(0,0,0,0.3)] hover:brightness-105 ring-4 ring-amber-400/50 animate-pulse'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl md:text-4xl drop-shadow-md">⚡</span>
+                        <span className="font-display text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm text-white">
+                          {state.teams.volt.name}
+                        </span>
+                      </div>
+                      <div className="mt-2 rounded-full bg-white/25 px-4 py-1 font-display text-xs md:text-sm font-black tracking-wider uppercase text-white shadow-inner">
+                        {lockedOut.includes('volt') ? '🔒 LOCKED OUT' : '🚨 SLAP BUZZER'}
+                      </div>
+                    </button>
+
+                    {/* Team Ampere Smartboard Buzzer */}
+                    <button
+                      type="button"
+                      onClick={() => buzz('ampere')}
+                      disabled={lockedOut.includes('ampere')}
+                      style={{ touchAction: 'manipulation' }}
+                      className={`group relative flex flex-col items-center justify-center rounded-3xl p-5 md:p-6 transition-all active:scale-95 active:translate-y-1 select-none border-4 ${
+                        lockedOut.includes('ampere')
+                          ? 'opacity-30 cursor-not-allowed bg-slate-200 border-slate-300 shadow-none'
+                          : 'cursor-pointer border-cyan-300 bg-gradient-to-b from-cyan-400 via-cyan-500 to-cyan-600 text-white shadow-[0_12px_24px_rgba(8,145,178,0.45),inset_0_3px_6px_rgba(255,255,255,0.8),inset_0_-4px_6px_rgba(0,0,0,0.3)] hover:brightness-105 ring-4 ring-cyan-400/50 animate-pulse'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-3xl md:text-4xl drop-shadow-md">⚡</span>
+                        <span className="font-display text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm text-white">
+                          {state.teams.ampere.name}
+                        </span>
+                      </div>
+                      <div className="mt-2 rounded-full bg-white/25 px-4 py-1 font-display text-xs md:text-sm font-black tracking-wider uppercase text-white shadow-inner">
+                        {lockedOut.includes('ampere') ? '🔒 LOCKED OUT' : '🚨 SLAP BUZZER'}
+                      </div>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

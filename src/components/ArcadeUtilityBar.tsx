@@ -82,21 +82,21 @@ export function ArcadeUtilityBar() {
               <div className="rounded-2xl border-2 border-amber-300 bg-amber-50/80 p-3.5 flex items-center justify-between">
                 <div>
                   <div className="font-display text-base font-black text-amber-950">Team Volt Buzzer</div>
-                  <div className="text-xs font-bold text-amber-800">Lightning Round buzzer lock-in</div>
+                  <div className="text-xs font-bold text-amber-800">Tap on-screen Left Buzzer (or press [A])</div>
                 </div>
-                <kbd className="rounded-xl border-2 border-amber-400 bg-amber-500 px-3 py-1 font-display text-lg font-black text-white shadow-md">
-                  [A]
-                </kbd>
+                <div className="rounded-xl border-2 border-amber-400 bg-amber-500 px-3 py-1 font-display text-sm font-black text-white shadow-md">
+                  TOUCH / [A]
+                </div>
               </div>
 
               <div className="rounded-2xl border-2 border-cyan-300 bg-cyan-50/80 p-3.5 flex items-center justify-between">
                 <div>
                   <div className="font-display text-base font-black text-cyan-950">Team Ampere Buzzer</div>
-                  <div className="text-xs font-bold text-cyan-800">Lightning Round buzzer lock-in</div>
+                  <div className="text-xs font-bold text-cyan-800">Tap on-screen Right Buzzer (or press [L])</div>
                 </div>
-                <kbd className="rounded-xl border-2 border-cyan-500 bg-cyan-600 px-3 py-1 font-display text-lg font-black text-white shadow-md">
-                  [L]
-                </kbd>
+                <div className="rounded-xl border-2 border-cyan-500 bg-cyan-600 px-3 py-1 font-display text-sm font-black text-white shadow-md">
+                  TOUCH / [L]
+                </div>
               </div>
 
               <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-3.5">

@@ -42,13 +42,13 @@ export function SetupScreen() {
                     Team {i + 1}
                   </span>
                   <span className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
-                    Buzzer Key:
-                    <kbd
-                      className="grid h-7 w-7 place-items-center rounded-xl font-black text-white shadow-md select-none"
+                    Smart Board Buzzer:
+                    <span
+                      className="grid h-7 px-2.5 place-items-center rounded-xl font-display text-xs font-black text-white shadow-md select-none"
                       style={{ background: theme.accent }}
                     >
-                      {theme.key}
-                    </kbd>
+                      {isVolt ? 'LEFT TOUCH' : 'RIGHT TOUCH'}
+                    </span>
                   </span>
                 </div>
                 <input
