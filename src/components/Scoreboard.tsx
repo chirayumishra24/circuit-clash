@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { BreadboardLeaderCircuit3D } from './BreadboardLeaderCircuit3D'
 import { POWER_UPS, TARGET_CHARGE, TEAM_THEME } from '../constants'
 import { useGame } from '../context/GameContext'
 import type { TeamId } from '../types'
@@ -143,14 +144,17 @@ function TeamPod({ teamId, active }: { teamId: TeamId; active: boolean }) {
 }
 
 export function Scoreboard({ activeTeam }: { activeTeam?: TeamId | null }) {
+  const { state } = useGame()
+
   return (
-    <div className="mx-auto flex w-full max-w-5xl items-stretch gap-4">
+    <div className="mx-auto flex w-full max-w-5xl items-center gap-4">
       <TeamPod teamId="volt" active={activeTeam === 'volt'} />
-      <div className="grid shrink-0 place-items-center">
-        <div className="clay-card grid h-11 w-11 place-items-center rounded-full font-display text-sm font-black text-slate-900 border-2 border-slate-200 shadow-md">
-          VS
-        </div>
-      </div>
+      <BreadboardLeaderCircuit3D
+        voltScore={state.teams.volt.score}
+        ampScore={state.teams.ampere.score}
+        voltName={state.teams.volt.name}
+        ampName={state.teams.ampere.name}
+      />
       <TeamPod teamId="ampere" active={activeTeam === 'ampere'} />
     </div>
   )
