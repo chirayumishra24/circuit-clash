@@ -23,14 +23,6 @@ export function RoundShell({ roundId, activeTeam, headerRight, children }: Props
       {/* Center Tournament Marquee Banner */}
       <div className="clay-card mx-auto mt-2 flex w-full max-w-5xl items-center justify-between gap-2 px-4 md:px-6 py-2">
         <div className="flex items-center gap-3.5">
-          <button
-            onClick={() => dispatch({ type: 'GO_TO', screen: 'map' })}
-            className="clay-btn flex items-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 px-3 py-1.5 text-xs font-black text-slate-700 transition shadow-xs cursor-pointer"
-            title="Return to Tournament Board without losing scores"
-          >
-            <span className="text-sm font-black">←</span>
-            <span>Board</span>
-          </button>
           <span className="clay-inset grid h-10 w-10 place-items-center text-xl">
             {round.icon}
           </span>
