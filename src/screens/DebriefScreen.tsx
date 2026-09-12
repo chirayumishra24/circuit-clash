@@ -34,6 +34,9 @@ export function DebriefScreen() {
             >
               🖨 Print Report
             </button>
+            <Button variant="ghost" size="sm" onClick={() => dispatch({ type: 'GO_TO', screen: 'map' })}>
+              🗺 Board
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => dispatch({ type: 'GO_TO', screen: 'win' })}>
               ← Back to Winners
             </Button>
@@ -140,7 +143,14 @@ export function DebriefScreen() {
         </div>
 
         <div className="mt-8 flex justify-center print:hidden">
-          <Button size="lg" onClick={() => dispatch({ type: 'RESTART' })}>
+          <Button
+            size="lg"
+            onClick={() => {
+              if (window.confirm('Start a new classroom game? Scores will reset to zero.')) {
+                dispatch({ type: 'RESTART' })
+              }
+            }}
+          >
             ↺ Start New Classroom Game
           </Button>
         </div>

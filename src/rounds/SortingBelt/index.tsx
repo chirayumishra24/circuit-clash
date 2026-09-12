@@ -70,7 +70,7 @@ export function SortingBelt() {
 
   function beginTurn(nextTurn: number) {
     setTurn(nextTurn)
-    setIndex(0)
+    setIndex(nextTurn === 1 ? 9 : 0)
     setCorrect(0)
     setWrong(0)
     setStreak(0)

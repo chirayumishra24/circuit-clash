@@ -18,26 +18,65 @@ interface Slot {
   outcome: string
 }
 
-const PLACEMENT_SLOTS: Slot[] = [
+interface PlacementQuestion {
+  prompt: string
+  subtext: string
+  slots: Slot[]
+}
+
+const PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   {
-    id: 'series',
-    label: 'In the main line, so all the current flows through it',
-    correct: true,
-    outcome: 'Correct — an ammeter goes in series. Every electron in the circuit passes through it, so it can count them.',
+    prompt: 'Where Does The Ammeter Connect?',
+    subtext: 'You are measuring the total circuit current flowing through the bulb!',
+    slots: [
+      {
+        id: 'series',
+        label: 'In the main line in series, so all current flows through it',
+        correct: true,
+        outcome: 'Correct — an ammeter goes in series. Every electron in the circuit passes through it, so it can count them.',
+      },
+      {
+        id: 'across-bulb',
+        label: 'Across the bulb in parallel, with one lead on each side',
+        correct: false,
+        outcome:
+          'That is a voltmeter position. An ammeter has almost no resistance, so it short-circuits the bulb — the bulb goes out and the meter takes all the current.',
+      },
+      {
+        id: 'across-battery',
+        label: 'Straight across the battery terminals',
+        correct: false,
+        outcome:
+          'That is a direct short across the cell. Huge current, a hot meter, and a blown fuse. Never do this.',
+      },
+    ],
   },
   {
-    id: 'across-bulb',
-    label: 'Across the bulb, with one lead on each side',
-    correct: false,
-    outcome:
-      'That is a voltmeter position. An ammeter has almost no resistance, so it short-circuits the bulb — the bulb goes out and the meter takes all the current.',
-  },
-  {
-    id: 'across-battery',
-    label: 'Straight across the battery terminals',
-    correct: false,
-    outcome:
-      'That is a direct short across the cell. Huge current, a hot meter, and a blown fuse. Never do this.',
+    prompt: 'What Happens If You Connect An Ammeter Across A Battery?',
+    subtext: 'Never wire an ammeter directly across the battery terminals!',
+    slots: [
+      {
+        id: 'short-spike',
+        label: 'Near-zero internal resistance creates a massive short-circuit spike',
+        correct: true,
+        outcome:
+          'Correct! An ammeter offers near-zero resistance. Wiring it across a battery allows runaway current that can damage the meter or cell.',
+      },
+      {
+        id: 'blocks-current',
+        label: 'It safely blocks all electric current because its resistance is too high',
+        correct: false,
+        outcome:
+          'Voltmeters have high resistance, but ammeters have virtually zero resistance!',
+      },
+      {
+        id: 'reads-volts',
+        label: 'It safely converts and measures the cell voltage in volts',
+        correct: false,
+        outcome:
+          'Incorrect. Ammeters count electron flow in amperes, not electrical potential in volts.',
+      },
+    ],
   },
 ]
 
@@ -175,24 +214,25 @@ export function AmmeterShowdown() {
 
   if (phase === 'placement' || phase === 'placementReveal') {
     const revealing = phase === 'placementReveal'
-    const chosen = PLACEMENT_SLOTS.find((s) => s.id === pick)
+    const activePlacementQ = PLACEMENT_QUESTIONS[turn % PLACEMENT_QUESTIONS.length]
+    const chosen = activePlacementQ.slots.find((s) => s.id === pick)
 
     return (
       <RoundShell roundId="ammeter" activeTeam={teamId}>
         <div className="mx-auto flex h-full max-w-3xl flex-col justify-center">
           <div className="clay-chassis p-8 bg-white shadow-2xl">
             <h3 className="text-center font-display text-3xl font-black text-slate-900">
-              Where Does The Ammeter Connect?
+              {activePlacementQ.prompt}
             </h3>
             <p className="mt-1 text-center text-sm font-bold text-slate-600">
               <span style={{ color: teamId === 'volt' ? '#b45309' : '#0e7490' }} className="font-black text-base">
                 {state.teams[teamId].name}
               </span>{' '}
-              — You are measuring the current through the bulb!
+              — {activePlacementQ.subtext}
             </p>
 
             <div className="mt-6 space-y-3">
-              {PLACEMENT_SLOTS.map((slot) => {
+              {activePlacementQ.slots.map((slot) => {
                 const isPick = pick === slot.id
                 return (
                   <button

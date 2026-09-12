@@ -28,6 +28,36 @@ export function ArcadeUtilityBar() {
 
   return (
     <>
+      {/* Top Left Stage Back Pod */}
+      {state.screen !== 'setup' && (
+        <div className="fixed top-3 left-3 z-50 flex items-center gap-1.5 rounded-full border-2 border-slate-300 bg-white/95 p-1 shadow-md backdrop-blur-xs">
+          <button
+            onClick={() => dispatch({ type: 'GO_BACK' })}
+            className="clay-btn flex items-center gap-1.5 rounded-full bg-slate-100 hover:bg-slate-200 px-3.5 py-1 text-xs font-black text-slate-900 transition cursor-pointer shadow-xs"
+            title={
+              state.screen === 'round'
+                ? 'Go back to Tournament Board (keeps scores)'
+                : state.screen === 'map'
+                  ? 'Go back to Team Setup'
+                  : state.screen === 'win'
+                    ? 'Go back to Tournament Board'
+                    : 'Go back to Champion Screen'
+            }
+          >
+            <span className="text-sm font-black">←</span>
+            <span>
+              {state.screen === 'round'
+                ? 'Back to Board'
+                : state.screen === 'map'
+                  ? 'Back to Setup'
+                  : state.screen === 'win'
+                    ? 'Back to Board'
+                    : 'Back to Winners'}
+            </span>
+          </button>
+        </div>
+      )}
+
       {/* Top Right Arcade Pod */}
       <div className="fixed top-3 right-3 z-50 flex items-center gap-1.5 rounded-full border-2 border-slate-300 bg-white/95 p-1 shadow-md backdrop-blur-xs">
         {/* Audio Mute Toggle */}

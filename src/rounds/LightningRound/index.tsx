@@ -10,12 +10,13 @@ import { BUZZER_QUESTIONS, FINAL_QUESTIONS } from '../../data/questions'
 import type { Question } from '../../data/questions'
 import type { TeamId } from '../../types'
 
-const BUZZ_WINDOW_SECONDS = 15
-const ANSWER_WINDOW_SECONDS = 8
+const TOTAL_QUESTIONS = 6 // Even number of questions: exactly 3 for Volt, 3 for Ampere
+const QUESTION_SECONDS = 15
+const STEAL_SECONDS = 12
 const CORRECT_POINTS = 50
-const WRONG_PENALTY = 25
+const STEAL_POINTS = 30
 
-type Phase = 'brief' | 'buzzer' | 'answering' | 'reveal' | 'wagerIntro' | 'wager' | 'final' | 'finalReveal'
+type Phase = 'brief' | 'question' | 'steal' | 'reveal' | 'wagerIntro' | 'wager' | 'final' | 'finalReveal'
 
 export function LightningRound() {
   const { state, dispatch } = useGame()
@@ -23,9 +24,13 @@ export function LightningRound() {
 
   const [phase, setPhase] = useState<Phase>('brief')
   const [qIndex, setQIndex] = useState(0)
-  const [answering, setAnswering] = useState<TeamId | null>(null)
-  const [lockedOut, setLockedOut] = useState<TeamId[]>([])
+  const [wrongPicks, setWrongPicks] = useState<number[]>([])
   const [picked, setPicked] = useState<number | null>(null)
+  const [stealInfo, setStealInfo] = useState<{
+    primaryTeam: TeamId
+    opponentTeam: TeamId
+    solvedBy?: TeamId | 'none'
+  } | null>(null)
 
   const [wagers, setWagers] = useState<Record<TeamId, number>>({
     volt: Math.min(100, state.teams.volt.score),
@@ -33,114 +38,131 @@ export function LightningRound() {
   })
   const [finalPicks, setFinalPicks] = useState<Partial<Record<TeamId, number>>>({})
 
-  const questions = BUZZER_QUESTIONS
+  // Distinct questions with an even count (3 for Team Volt, 3 for Team Ampere)
+  const questions = BUZZER_QUESTIONS.slice(0, TOTAL_QUESTIONS)
   const question: Question = questions[qIndex]
   const finalQuestion = FINAL_QUESTIONS[0]
 
-  const clockTotal = phase === 'answering' ? ANSWER_WINDOW_SECONDS : BUZZ_WINDOW_SECONDS
+  const primaryTeam: TeamId = TEAM_IDS[qIndex % 2]
+  const opponentTeam: TeamId = TEAM_IDS[(qIndex + 1) % 2]
+  const activeTeam: TeamId = phase === 'steal' ? opponentTeam : primaryTeam
+
+  const clockTotal = phase === 'steal' ? STEAL_SECONDS : QUESTION_SECONDS
 
   const { remaining, setRemaining } = useCountdown({
     seconds: clockTotal,
-    running: (phase === 'buzzer' || phase === 'answering') && !state.paused,
+    running: (phase === 'question' || phase === 'steal') && !state.paused,
     resetKey: `${qIndex}-${phase}`,
     onEnd: () => {
-      if (phase === 'answering') {
-        timeOutAnswer()
-      } else if (phase === 'buzzer') {
-        timeOutBuzzer()
+      if (phase === 'question') {
+        play('wrong')
+        setStealInfo({ primaryTeam, opponentTeam })
+        setPhase('steal')
+        setRemaining(STEAL_SECONDS)
+      } else if (phase === 'steal') {
+        play('wrong')
+        setStealInfo((prev) => ({
+          primaryTeam: prev?.primaryTeam ?? primaryTeam,
+          opponentTeam: prev?.opponentTeam ?? opponentTeam,
+          solvedBy: 'none',
+        }))
+        setPhase('reveal')
       }
     },
   })
 
-  function buzz(team: TeamId) {
-    if (phase !== 'buzzer' || lockedOut.includes(team)) return
-    play('buzz')
-    setAnswering(team)
-    setPhase('answering')
-    setRemaining(ANSWER_WINDOW_SECONDS)
-  }
-
   function pickOption(index: number) {
-    if (phase !== 'answering' || !answering) return
-    setPicked(index)
-    const right = index === question.answer
-
-    play(right ? 'charge' : 'wrong')
-    dispatch({
-      type: 'AWARD',
-      team: answering,
-      points: right ? CORRECT_POINTS : -WRONG_PENALTY,
-      round: 'lightning',
-      correct: right,
-    })
-
-    if (right) {
-      setPhase('reveal')
-    } else {
-      const nextLocked = [...lockedOut, answering]
-      setLockedOut(nextLocked)
-      setAnswering(null)
-      setPicked(null)
-
-      if (nextLocked.length < TEAM_IDS.length) {
-        setPhase('buzzer')
-        setRemaining(BUZZ_WINDOW_SECONDS)
+    if (phase === 'question') {
+      setPicked(index)
+      const right = index === question.answer
+      if (right) {
+        play('charge')
+        dispatch({
+          type: 'AWARD',
+          team: primaryTeam,
+          points: CORRECT_POINTS,
+          round: 'lightning',
+          correct: true,
+        })
+        setStealInfo({
+          primaryTeam,
+          opponentTeam,
+          solvedBy: primaryTeam,
+        })
+        setPhase('reveal')
       } else {
+        // Wrong answer: DO NOT reveal answer! Pass to opponent team for steal!
+        play('wrong')
+        setWrongPicks([index])
+        setStealInfo({
+          primaryTeam,
+          opponentTeam,
+        })
+        setPhase('steal')
+        setRemaining(STEAL_SECONDS)
+      }
+    } else if (phase === 'steal') {
+      if (wrongPicks.includes(index)) return
+      setPicked(index)
+      const right = index === question.answer
+      if (right) {
+        play('charge')
+        dispatch({
+          type: 'AWARD',
+          team: opponentTeam,
+          points: STEAL_POINTS,
+          round: 'lightning',
+          correct: true,
+        })
+        setStealInfo({
+          primaryTeam,
+          opponentTeam,
+          solvedBy: opponentTeam,
+        })
+        setPhase('reveal')
+      } else {
+        // Opponent also missed: NOW reveal answer!
+        play('wrong')
+        setWrongPicks((prev) => [...prev, index])
+        setStealInfo({
+          primaryTeam,
+          opponentTeam,
+          solvedBy: 'none',
+        })
         setPhase('reveal')
       }
     }
   }
 
-  function timeOutAnswer() {
-    if (!answering) return
-    play('wrong')
-    dispatch({
-      type: 'AWARD',
-      team: answering,
-      points: -WRONG_PENALTY,
-      round: 'lightning',
-      correct: false,
-    })
-    const nextLocked = [...lockedOut, answering]
-    setLockedOut(nextLocked)
-    setAnswering(null)
-    setPicked(null)
-
-    if (nextLocked.length < TEAM_IDS.length) {
-      setPhase('buzzer')
-      setRemaining(BUZZ_WINDOW_SECONDS)
-    } else {
-      setPhase('reveal')
-    }
-  }
-
-  function timeOutBuzzer() {
-    play('wrong')
-    setPhase('reveal')
-  }
-
   function nextQuestion() {
     if (qIndex + 1 < questions.length) {
       setQIndex(qIndex + 1)
-      setAnswering(null)
-      setLockedOut([])
+      setWrongPicks([])
       setPicked(null)
-      setPhase('buzzer')
-      setRemaining(BUZZ_WINDOW_SECONDS)
+      setStealInfo(null)
+      setPhase('question')
+      setRemaining(QUESTION_SECONDS)
     } else {
       setPhase('wagerIntro')
     }
   }
 
   useEffect(() => {
-    if (phase !== 'buzzer') return
+    if (phase !== 'question' && phase !== 'steal') return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'a' || e.key === 'A') buzz('volt')
-      if (e.key === 'l' || e.key === 'L') buzz('ampere')
+      const map: Record<string, number> = {
+        '1': 0, 'a': 0, 'A': 0,
+        '2': 1, 'b': 1, 'B': 1,
+        '3': 2, 'c': 2, 'C': 2,
+        '4': 3, 'd': 3, 'D': 3,
+      }
+      if (e.key in map) {
+        pickOption(map[e.key])
+      }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  })
+  }, [phase, qIndex, wrongPicks])
 
   function submitFinal(team: TeamId, option: number) {
     setFinalPicks((p) => ({ ...p, [team]: option }))
@@ -181,21 +203,31 @@ export function LightningRound() {
             <div className="text-6xl animate-bounce">⚡</div>
             <h3 className="mt-4 font-display text-4xl font-black text-slate-900">Lightning Round</h3>
             <p className="mt-3 text-lg font-bold text-slate-700">
-              {questions.length} rapid-fire buzzer questions, followed by <strong>The Final Charge</strong> wager!
+              {questions.length} turn-wise questions, followed by <strong>The Final Charge</strong> wager!
             </p>
             <div className="mx-auto mt-6 w-fit rounded-2xl border-2 border-slate-200 bg-slate-50 px-6 py-3.5 text-center text-sm font-bold text-slate-800 shadow-sm">
               <div className="flex items-center justify-center gap-3">
-                <span className="rounded-xl bg-amber-500 px-2.5 py-1 font-black text-white shadow-sm">⚡ Left Buzzer: {state.teams.volt.name}</span>
+                <span className="rounded-xl bg-amber-500 px-3 py-1 font-black text-white shadow-sm">
+                  ⚡ Turns 1, 3, 5: {state.teams.volt.name}
+                </span>
                 <span className="text-slate-400">·</span>
-                <span className="rounded-xl bg-cyan-600 px-2.5 py-1 font-black text-white shadow-sm">⚡ Right Buzzer: {state.teams.ampere.name}</span>
+                <span className="rounded-xl bg-cyan-600 px-3 py-1 font-black text-white shadow-sm">
+                  ⚡ Turns 2, 4, 6: {state.teams.ampere.name}
+                </span>
               </div>
               <div className="mt-2 text-xs font-bold text-slate-600">
-                Tap on-screen buzzers on the Smart Board to lock in! (+{CORRECT_POINTS} pts / −{WRONG_PENALTY} pts)
+                +{CORRECT_POINTS} pts for correct answer • If incorrect, opponent gets a chance to STEAL (+{STEAL_POINTS} pts)!
               </div>
             </div>
             <div className="mt-8">
-              <Button size="lg" onClick={() => setPhase('buzzer')}>
-                ⚡ Arm The Buzzers →
+              <Button
+                size="lg"
+                onClick={() => {
+                  setPhase('question')
+                  setRemaining(QUESTION_SECONDS)
+                }}
+              >
+                ⚡ Begin Turn 1: {state.teams.volt.name} →
               </Button>
             </div>
           </div>
@@ -204,13 +236,16 @@ export function LightningRound() {
     )
   }
 
-  if (phase === 'buzzer' || phase === 'answering' || phase === 'reveal') {
+  if (phase === 'question' || phase === 'steal' || phase === 'reveal') {
     const revealing = phase === 'reveal'
+    const displayActiveTeam = revealing
+      ? (stealInfo?.solvedBy === 'none' ? null : stealInfo?.solvedBy)
+      : activeTeam
 
     return (
       <RoundShell
         roundId="lightning"
-        activeTeam={answering}
+        activeTeam={displayActiveTeam}
         headerRight={
           <div className="flex items-center gap-3">
             <span className="font-display text-xs font-black uppercase tracking-widest text-slate-700">
@@ -222,11 +257,60 @@ export function LightningRound() {
       >
         <div className="mx-auto flex h-full max-w-3xl flex-col justify-center">
           <div className="clay-chassis p-8 bg-white shadow-2xl flex flex-col gap-4">
-            <div className="text-center">
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-emerald-800">
+            {/* Header Stage & Turn Status */}
+            <div className="flex flex-col items-center justify-center gap-1.5 text-center">
+              {phase === 'question' && (
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-4 py-1 font-display text-xs font-black uppercase tracking-wider text-white shadow-sm ${
+                      primaryTeam === 'volt' ? 'bg-amber-500' : 'bg-cyan-600'
+                    }`}
+                  >
+                    ⚡ Turn {qIndex + 1} of {questions.length} • {state.teams[primaryTeam].name}'s Question
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 font-display text-xs font-black text-slate-700 shadow-inner">
+                    +{CORRECT_POINTS} PTS
+                  </span>
+                </div>
+              )}
+
+              {phase === 'steal' && (
+                <div className="pop-in flex flex-col items-center gap-1">
+                  <span
+                    className={`rounded-full px-5 py-1.5 font-display text-sm font-black uppercase tracking-wider text-white shadow-md animate-pulse ${
+                      opponentTeam === 'volt' ? 'bg-amber-500' : 'bg-cyan-600'
+                    }`}
+                  >
+                    🚨 STEAL OPPORTUNITY: {state.teams[opponentTeam].name}
+                  </span>
+                  <span className="text-xs font-extrabold text-rose-600">
+                    {state.teams[primaryTeam].name} missed! Can {state.teams[opponentTeam].name} steal for +{STEAL_POINTS} pts?
+                  </span>
+                </div>
+              )}
+
+              {phase === 'reveal' && (
+                <div className="pop-in">
+                  {stealInfo?.solvedBy === 'none' ? (
+                    <span className="rounded-full bg-slate-200 px-4 py-1.5 font-display text-xs font-black uppercase text-slate-700">
+                      ❌ Neither team got it right • Correct answer revealed
+                    </span>
+                  ) : stealInfo?.solvedBy === primaryTeam ? (
+                    <span className="rounded-full bg-emerald-500 px-4 py-1.5 font-display text-xs font-black uppercase text-white shadow-md">
+                      ✔ Correct! {state.teams[primaryTeam].name} (+{CORRECT_POINTS} pts)
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-emerald-600 px-4 py-1.5 font-display text-xs font-black uppercase text-white shadow-md">
+                      ⚡ STEAL SUCCESS! {state.teams[opponentTeam].name} (+{STEAL_POINTS} pts)
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <span className="rounded-full bg-emerald-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800">
                 {question.subtopic}
               </span>
-              <h3 className="mt-3 font-display text-2xl font-black leading-snug text-slate-900">
+              <h3 className="mt-1 font-display text-2xl font-black leading-snug text-slate-900">
                 {question.prompt}
               </h3>
             </div>
@@ -234,24 +318,55 @@ export function LightningRound() {
             <div className="mt-2 grid gap-3 sm:grid-cols-2">
               {question.options.map((opt, i) => {
                 const isAnswer = i === question.answer
-                const isPicked = picked === i
+                const isWrong = wrongPicks.includes(i)
+
+                let style = 'border-slate-200 bg-white hover:border-amber-400 cursor-pointer'
+
+                if (revealing) {
+                  if (isAnswer) {
+                    style = 'border-emerald-500 bg-emerald-50 shadow-md scale-[1.01] cursor-default'
+                  } else if (isWrong) {
+                    style = 'border-rose-400 bg-rose-50/60 opacity-60 line-through cursor-default'
+                  } else {
+                    style = 'border-slate-200 bg-slate-50 opacity-40 cursor-default'
+                  }
+                } else if (phase === 'steal') {
+                  if (isWrong) {
+                    style = 'border-rose-300 bg-rose-50/60 opacity-40 line-through cursor-not-allowed'
+                  } else {
+                    style = 'border-slate-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/40 cursor-pointer shadow-xs'
+                  }
+                } else if (phase === 'question') {
+                  style = primaryTeam === 'volt'
+                    ? 'border-slate-200 bg-white hover:border-amber-400 hover:bg-amber-50/40 cursor-pointer shadow-xs'
+                    : 'border-slate-200 bg-white hover:border-cyan-400 hover:bg-cyan-50/40 cursor-pointer shadow-xs'
+                }
+
                 return (
                   <button
                     key={i}
                     onClick={() => pickOption(i)}
-                    disabled={revealing || !answering}
-                    className={`clay-card border-2 p-4 text-left transition-all ${
-                      revealing && isAnswer
-                        ? 'border-emerald-500 bg-emerald-50 shadow-md scale-[1.01]'
-                        : revealing && isPicked
-                          ? 'border-rose-500 bg-rose-50 shadow-md'
-                          : 'border-slate-200 bg-white hover:border-amber-400'
-                    } ${answering && !revealing ? 'cursor-pointer hover:bg-slate-50' : ''}`}
+                    disabled={revealing || (phase === 'steal' && isWrong)}
+                    className={`clay-card border-2 p-4 text-left transition-all relative ${style}`}
                   >
-                    <span className="mr-2 font-display font-black text-amber-700">
-                      [{String.fromCharCode(65 + i)}]
-                    </span>
-                    <span className="font-bold text-slate-900 text-base">{opt}</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-display font-black text-amber-700">
+                          [{String.fromCharCode(65 + i)}]
+                        </span>
+                        <span className="font-bold text-slate-900 text-base">{opt}</span>
+                      </div>
+                      {revealing && isAnswer && (
+                        <span className="shrink-0 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-black text-white">
+                          ✔ Correct
+                        </span>
+                      )}
+                      {isWrong && (
+                        <span className="shrink-0 text-rose-600 font-black text-sm">
+                          ❌
+                        </span>
+                      )}
+                    </div>
                   </button>
                 )
               })}
@@ -262,13 +377,19 @@ export function LightningRound() {
                 <div className="rise-in flex flex-col items-center">
                   <div className="flex items-center gap-3 max-w-xl text-left bg-slate-50 p-3.5 rounded-2xl border-2 border-slate-200 shadow-sm">
                     <img
-                      src={picked === question.answer ? '/assets/rick_and_morty/rick_experiment.jpg' : '/assets/rick_and_morty/morty_shock.jpg'}
+                      src={
+                        stealInfo?.solvedBy && stealInfo.solvedBy !== 'none'
+                          ? '/assets/rick_and_morty/rick_experiment.jpg'
+                          : '/assets/rick_and_morty/morty_shock.jpg'
+                      }
                       alt="Rick & Morty reaction"
                       className="h-14 w-14 rounded-xl object-cover border border-slate-900 shadow-xs shrink-0"
                     />
                     <div>
                       <span className="font-display text-xs font-black uppercase text-slate-800">
-                        {picked === question.answer ? '🧪 Rick: Correct!' : '⚠️ Morty: Aw Geez!'}
+                        {stealInfo?.solvedBy && stealInfo.solvedBy !== 'none'
+                          ? '🧪 Rick: Science confirms it!'
+                          : '⚠️ Morty: Aw Geez!'}
                       </span>
                       <p className="text-sm font-bold text-slate-700">💡 {question.explain}</p>
                     </div>
@@ -277,65 +398,13 @@ export function LightningRound() {
                     {qIndex + 1 < questions.length ? 'Next Question →' : 'On To The Final Charge Wager →'}
                   </Button>
                 </div>
-              ) : answering ? (
-                <div
-                  className="pop-in font-display text-2xl font-black"
-                  style={{ color: answering === 'volt' ? '#b45309' : '#0e7490' }}
-                >
-                  ⚡ {state.teams[answering].name} buzzed in! Pick your answer!
-                </div>
               ) : (
-                <div className="rise-in flex flex-col items-center gap-3">
-                  <div className="font-display text-sm md:text-base font-black uppercase tracking-wider text-slate-700">
-                    {lockedOut.length > 0 ? '⚡ OPPONENT STEAL CHANCE — TAP YOUR BUZZER!' : '⚡ TAP YOUR TEAM BUZZER TO LOCK IN!'}
-                  </div>
-                  <div className="grid w-full grid-cols-2 gap-4 pt-1">
-                    {/* Team Volt Smartboard Buzzer */}
-                    <button
-                      type="button"
-                      onClick={() => buzz('volt')}
-                      disabled={lockedOut.includes('volt')}
-                      style={{ touchAction: 'manipulation' }}
-                      className={`group relative flex flex-col items-center justify-center rounded-3xl p-5 md:p-6 transition-all active:scale-95 active:translate-y-1 select-none border-4 ${
-                        lockedOut.includes('volt')
-                          ? 'opacity-30 cursor-not-allowed bg-slate-200 border-slate-300 shadow-none'
-                          : 'cursor-pointer border-amber-300 bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-white shadow-[0_12px_24px_rgba(217,119,6,0.45),inset_0_3px_6px_rgba(255,255,255,0.8),inset_0_-4px_6px_rgba(0,0,0,0.3)] hover:brightness-105 ring-4 ring-amber-400/50 animate-pulse'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-3xl md:text-4xl drop-shadow-md">⚡</span>
-                        <span className="font-display text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm text-white">
-                          {state.teams.volt.name}
-                        </span>
-                      </div>
-                      <div className="mt-2 rounded-full bg-white/25 px-4 py-1 font-display text-xs md:text-sm font-black tracking-wider uppercase text-white shadow-inner">
-                        {lockedOut.includes('volt') ? '🔒 LOCKED OUT' : '🚨 SLAP BUZZER'}
-                      </div>
-                    </button>
-
-                    {/* Team Ampere Smartboard Buzzer */}
-                    <button
-                      type="button"
-                      onClick={() => buzz('ampere')}
-                      disabled={lockedOut.includes('ampere')}
-                      style={{ touchAction: 'manipulation' }}
-                      className={`group relative flex flex-col items-center justify-center rounded-3xl p-5 md:p-6 transition-all active:scale-95 active:translate-y-1 select-none border-4 ${
-                        lockedOut.includes('ampere')
-                          ? 'opacity-30 cursor-not-allowed bg-slate-200 border-slate-300 shadow-none'
-                          : 'cursor-pointer border-cyan-300 bg-gradient-to-b from-cyan-400 via-cyan-500 to-cyan-600 text-white shadow-[0_12px_24px_rgba(8,145,178,0.45),inset_0_3px_6px_rgba(255,255,255,0.8),inset_0_-4px_6px_rgba(0,0,0,0.3)] hover:brightness-105 ring-4 ring-cyan-400/50 animate-pulse'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-3xl md:text-4xl drop-shadow-md">⚡</span>
-                        <span className="font-display text-2xl md:text-3xl font-black tracking-tight drop-shadow-sm text-white">
-                          {state.teams.ampere.name}
-                        </span>
-                      </div>
-                      <div className="mt-2 rounded-full bg-white/25 px-4 py-1 font-display text-xs md:text-sm font-black tracking-wider uppercase text-white shadow-inner">
-                        {lockedOut.includes('ampere') ? '🔒 LOCKED OUT' : '🚨 SLAP BUZZER'}
-                      </div>
-                    </button>
-                  </div>
+                <div className="font-display text-sm font-black text-slate-600">
+                  {phase === 'question' ? (
+                    <span>👉 {state.teams[primaryTeam].name}, select your answer!</span>
+                  ) : (
+                    <span>👉 {state.teams[opponentTeam].name}, choose from the remaining options to steal!</span>
+                  )}
                 </div>
               )}
             </div>

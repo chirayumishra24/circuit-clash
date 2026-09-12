@@ -73,6 +73,14 @@ export function HostBar() {
             )}
 
             <button
+              onClick={() => dispatch({ type: 'GO_BACK' })}
+              className="clay-btn bg-amber-50 px-3 py-1 text-xs font-black text-amber-800 hover:bg-amber-100"
+              title="Go back one stage without losing scores"
+            >
+              ← Back
+            </button>
+
+            <button
               onClick={() => dispatch({ type: 'GO_TO', screen: 'map' })}
               className="clay-btn bg-slate-100 px-3 py-1 text-xs font-black text-slate-800 hover:bg-slate-200"
             >
@@ -88,7 +96,7 @@ export function HostBar() {
 
             <button
               onClick={() => {
-                if (window.confirm('Restart the whole game? Both scores go back to zero.')) {
+                if (window.confirm('Restart the whole game? Both scores go back to zero.\n(To go back a stage without resetting scores, use the Back button instead.)')) {
                   dispatch({ type: 'RESTART' })
                 }
               }}

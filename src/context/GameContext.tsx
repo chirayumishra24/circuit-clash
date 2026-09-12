@@ -35,6 +35,7 @@ const initialState: GameState = {
   paused: false,
   muted: false,
   winner: null,
+  stageHistory: ['setup'],
 }
 
 type Action =
@@ -46,6 +47,7 @@ type Action =
   | { type: 'USE_POWERUP'; team: TeamId; powerUp: PowerUpId }
   | { type: 'GRANT_POWERUP'; team: TeamId; powerUp: PowerUpId }
   | { type: 'GO_TO'; screen: ScreenId }
+  | { type: 'GO_BACK' }
   | { type: 'START_ROUND'; round: RoundId }
   | { type: 'COMPLETE_ROUND'; round: RoundId }
   | { type: 'TOGGLE_PAUSE' }
@@ -72,7 +74,12 @@ function reducer(state: GameState, action: Action): GameState {
       }
 
     case 'START_GAME':
-      return { ...state, screen: 'map', currentRound: ROUND_ORDER[0] }
+      return {
+        ...state,
+        screen: 'map',
+        currentRound: ROUND_ORDER[0],
+        stageHistory: ['setup', 'map'],
+      }
 
     case 'AWARD': {
       const team = state.teams[action.team]
@@ -150,22 +157,59 @@ function reducer(state: GameState, action: Action): GameState {
       }
     }
 
-    case 'GO_TO':
+    case 'GO_TO': {
+      const history = state.stageHistory || ['setup']
+      const stageHistory = history[history.length - 1] === action.screen
+        ? history
+        : [...history, action.screen]
       return {
         ...state,
         screen: action.screen,
+        stageHistory,
         winner: action.screen === 'win' ? decideWinner(state) : state.winner,
       }
+    }
 
-    case 'START_ROUND':
-      return { ...state, screen: 'round', currentRound: action.round, paused: false }
+    case 'GO_BACK': {
+      if (state.screen === 'debrief') {
+        return { ...state, screen: 'win' }
+      }
+      if (state.screen === 'win') {
+        return { ...state, screen: 'map' }
+      }
+      if (state.screen === 'round') {
+        return { ...state, screen: 'map', paused: false }
+      }
+      if (state.screen === 'map') {
+        return { ...state, screen: 'setup' }
+      }
+      return state
+    }
+
+    case 'START_ROUND': {
+      const history = state.stageHistory || ['setup']
+      return {
+        ...state,
+        screen: 'round',
+        currentRound: action.round,
+        paused: false,
+        stageHistory: [...history, 'round'],
+      }
+    }
 
     case 'COMPLETE_ROUND': {
       const completedRounds = state.completedRounds.includes(action.round)
         ? state.completedRounds
         : [...state.completedRounds, action.round]
       const allDone = completedRounds.length >= ROUND_ORDER.length
-      const next: GameState = { ...state, completedRounds, screen: allDone ? 'win' : 'map' }
+      const nextScreen: ScreenId = allDone ? 'win' : 'map'
+      const history = state.stageHistory || ['setup']
+      const next: GameState = {
+        ...state,
+        completedRounds,
+        screen: nextScreen,
+        stageHistory: [...history, nextScreen],
+      }
       if (allDone) next.winner = decideWinner(next)
       return next
     }

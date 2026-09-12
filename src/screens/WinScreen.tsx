@@ -123,12 +123,23 @@ export function WinScreen() {
         </div>
 
         <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <button
+            onClick={() => dispatch({ type: 'GO_TO', screen: 'map' })}
+            className="clay-btn bg-slate-100 hover:bg-slate-200 border border-slate-300 px-6 py-3 font-display text-base font-black text-slate-800 cursor-pointer"
+            title="Return to tournament board without resetting scores"
+          >
+            ← Back to Board
+          </button>
           <Button size="lg" onClick={() => dispatch({ type: 'GO_TO', screen: 'debrief' })}>
             📊 View Learning Debrief →
           </Button>
           <button
-            onClick={() => dispatch({ type: 'RESTART' })}
-            className="clay-btn bg-slate-100 hover:bg-slate-200 border border-slate-300 px-6 py-3 font-display text-base font-black text-slate-800"
+            onClick={() => {
+              if (window.confirm('Start a new match? Both team scores will reset to zero.')) {
+                dispatch({ type: 'RESTART' })
+              }
+            }}
+            className="clay-btn bg-rose-50 hover:bg-rose-100 border border-rose-200 px-6 py-3 font-display text-base font-black text-rose-700 cursor-pointer"
           >
             ↺ Play New Match
           </button>

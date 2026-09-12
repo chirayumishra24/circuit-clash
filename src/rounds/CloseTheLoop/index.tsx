@@ -69,6 +69,17 @@ export function CloseTheLoop() {
     }
   }
 
+  function prevLevel() {
+    if (levelIndex > 0) {
+      const prevIdx = levelIndex - 1
+      setLevelIndex(prevIdx)
+      setCells(cloneCells(PUZZLES[prevIdx].cells))
+      setHintAt(null)
+      solvedRef.current = false
+      setPhase('play')
+    }
+  }
+
   useEffect(() => {
     if (phase !== 'play') return
     if (!result.closed || solvedRef.current) return
@@ -269,16 +280,28 @@ export function CloseTheLoop() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             {PUZZLES.map((p, i) => (
-              <span
+              <button
                 key={p.id}
+                type="button"
+                onClick={() => {
+                  if (phase === 'play' && i !== levelIndex) {
+                    setLevelIndex(i)
+                    setCells(cloneCells(PUZZLES[i].cells))
+                    setHintAt(null)
+                    solvedRef.current = false
+                  }
+                }}
+                disabled={phase !== 'play'}
                 className={`h-2.5 w-8 rounded-full transition-all duration-300 ${
+                  phase === 'play' ? 'cursor-pointer hover:opacity-90' : 'cursor-default'
+                } ${
                   i < solvedCount
                     ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]'
                     : i === levelIndex
                       ? 'bg-amber-400 ring-2 ring-amber-300'
                       : 'bg-slate-200'
                 }`}
-                title={p.label}
+                title={`Jump to ${p.label}`}
               />
             ))}
           </div>
@@ -305,6 +328,16 @@ export function CloseTheLoop() {
             </div>
 
             <div className="flex items-center gap-2">
+              {levelIndex > 0 && (
+                <button
+                  onClick={prevLevel}
+                  disabled={phase !== 'play'}
+                  className="clay-btn bg-slate-100 hover:bg-slate-200 border border-slate-300 px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm disabled:opacity-40 cursor-pointer"
+                  title="Go back to previous circuit level"
+                >
+                  ← Prev Circuit
+                </button>
+              )}
               <button
                 onClick={useHint}
                 disabled={phase !== 'play'}

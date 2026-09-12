@@ -309,7 +309,7 @@ export function SabotageRepair() {
               Every sabotage is fully fixable — make them think!
             </p>
             <div className="mt-6 space-y-3">
-              {SABOTAGES.map((s) => (
+              {SABOTAGES.filter((s) => turn === 0 || s.label !== results[TEAM_IDS[0]]?.sabotage).map((s) => (
                 <button
                   key={s.id}
                   onClick={() => chooseSabotage(s)}

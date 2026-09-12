@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useGame } from './context/GameContext'
 import { HostBar } from './components/HostBar'
 import { SetupScreen } from './screens/SetupScreen'
@@ -35,8 +36,35 @@ function Round({ id }: { id: RoundId }) {
 }
 
 export default function App() {
-  const { state } = useGame()
+  const { state, dispatch } = useGame()
   useBackgroundMusic()
+
+  // Handle browser back button: go back one stage instead of leaving or resetting activity
+  useEffect(() => {
+    const handlePopState = () => {
+      if (state.screen !== 'setup') {
+        dispatch({ type: 'GO_BACK' })
+        window.history.pushState(null, '', window.location.href)
+      }
+    }
+
+    window.history.pushState(null, '', window.location.href)
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [state.screen, dispatch])
+
+  // Prevent accidental page reload/closing during an active match
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (state.screen !== 'setup' && (state.teams.volt.score > 0 || state.teams.ampere.score > 0)) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', onBeforeUnload)
+    return () => window.removeEventListener('beforeunload', onBeforeUnload)
+  }, [state.screen, state.teams.volt.score, state.teams.ampere.score])
+
   const key = state.screen === 'round' ? `round-${state.currentRound}` : state.screen
 
   return (

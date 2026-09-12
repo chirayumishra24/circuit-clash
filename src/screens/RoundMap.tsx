@@ -12,7 +12,15 @@ export function RoundMap() {
     <div className="flex h-full flex-col overflow-y-auto px-6 py-5">
       <Scoreboard />
 
-      <div className="mt-5 text-center">
+      <div className="relative mx-auto mt-5 w-full max-w-5xl text-center">
+        <button
+          onClick={() => dispatch({ type: 'GO_TO', screen: 'setup' })}
+          className="clay-btn sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 mb-3 sm:mb-0 inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 px-3.5 py-1.5 text-xs font-black text-slate-700 shadow-xs cursor-pointer"
+          title="Back to Team Setup to edit names without resetting scores"
+        >
+          <span className="text-sm font-black">←</span>
+          <span>Back to Setup</span>
+        </button>
         <h2 className="font-display text-4xl font-black text-slate-900">Tournament Board</h2>
         <p className="mt-1 text-base font-bold text-slate-600">
           {allDone

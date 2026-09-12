@@ -27,6 +27,7 @@ export interface GameState {
   paused: boolean
   muted: boolean
   winner: TeamId | 'tie' | null
+  stageHistory?: ScreenId[]
 }
 
 export interface RoundMeta {
