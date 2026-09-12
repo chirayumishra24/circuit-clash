@@ -281,37 +281,7 @@ export function SortingBelt() {
     <RoundShell
       roundId="belt"
       activeTeam={teamId}
-      headerRight={
-        <div className="flex items-center gap-2 text-xs font-black">
-          <span
-            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 shadow-xs border transition-all ${
-              teamId === 'volt'
-                ? 'bg-amber-100 border-amber-400 text-amber-950 ring-1 ring-amber-400/40'
-                : 'bg-white/80 border-slate-300 text-slate-700'
-            }`}
-          >
-            ⚡ {state.teams.volt.name}: ✔ {stats.volt.correct}
-          </span>
-          <span
-            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 shadow-xs border transition-all ${
-              teamId === 'ampere'
-                ? 'bg-cyan-100 border-cyan-400 text-cyan-950 ring-1 ring-cyan-400/40'
-                : 'bg-white/80 border-slate-300 text-slate-700'
-            }`}
-          >
-            ⚡ {state.teams.ampere.name}: ✔ {stats.ampere.correct}
-          </span>
-          {mult > 1 && (
-            <span className="rounded-full bg-amber-500 px-2 py-0.5 font-display text-[11px] font-black text-white shadow-xs animate-bounce">
-              🔥 ×{mult}
-            </span>
-          )}
-          <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
-            {index + 1}/{TOTAL_ITEMS}
-          </span>
-          <Timer remaining={remaining} total={CHANCE_SECONDS} />
-        </div>
-      }
+      headerRight={<Timer remaining={remaining} total={CHANCE_SECONDS} />}
     >
       <div className="mx-auto flex min-h-full max-w-2xl flex-col justify-center py-1 gap-2.5">
         {/* Conductor Button */}
