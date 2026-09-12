@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react'
 import { useGame } from '../context/GameContext'
 
-export type SoundName = 'buzz' | 'correct' | 'wrong' | 'tick' | 'charge' | 'victory' | 'spark'
+export type SoundName = 'buzz' | 'correct' | 'wrong' | 'tick' | 'charge' | 'victory' | 'spark' | 'switch'
 
 type Tone = { freq: number; dur: number; type?: OscillatorType; gain?: number; delay?: number }
 
@@ -32,6 +32,11 @@ const RECIPES: Record<SoundName, Tone[]> = {
     { freq: 1047, dur: 0.3, type: 'triangle', delay: 0.39 },
   ],
   spark: [{ freq: 2000, dur: 0.05, type: 'square', gain: 0.06 }],
+  switch: [
+    { freq: 440, dur: 0.09, type: 'triangle', gain: 0.18 },
+    { freq: 659, dur: 0.14, type: 'sine', delay: 0.08, gain: 0.18 },
+    { freq: 880, dur: 0.18, type: 'sine', delay: 0.16, gain: 0.15 },
+  ],
 }
 
 export function useSound() {
