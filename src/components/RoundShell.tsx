@@ -17,11 +17,11 @@ export function RoundShell({ roundId, activeTeam, headerRight, children }: Props
   const round = ROUNDS[roundId]
 
   return (
-    <div className="flex h-full flex-col px-6 py-4">
+    <div className="flex h-full flex-col px-4 md:px-6 py-2 md:py-3">
       <Scoreboard activeTeam={activeTeam} />
 
       {/* Center Tournament Marquee Banner */}
-      <div className="clay-card mx-auto mt-3 flex w-full max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-2.5">
+      <div className="clay-card mx-auto mt-2 flex w-full max-w-5xl items-center justify-between gap-2 px-4 md:px-6 py-2">
         <div className="flex items-center gap-3.5">
           <button
             onClick={() => dispatch({ type: 'GO_TO', screen: 'map' })}

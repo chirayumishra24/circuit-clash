@@ -282,59 +282,57 @@ export function SortingBelt() {
       roundId="belt"
       activeTeam={teamId}
       headerRight={
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-black">
-            <span
-              className={`flex items-center gap-1 rounded-full px-3 py-1 shadow-xs border transition-all ${
-                teamId === 'volt'
-                  ? 'bg-amber-100 border-amber-400 text-amber-950 ring-2 ring-amber-400/40'
-                  : 'bg-white/80 border-slate-300 text-slate-700'
-              }`}
-            >
-              ⚡ {state.teams.volt.name}: ✔ {stats.volt.correct} ✘ {stats.volt.wrong}
+        <div className="flex items-center gap-2 text-xs font-black">
+          <span
+            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 shadow-xs border transition-all ${
+              teamId === 'volt'
+                ? 'bg-amber-100 border-amber-400 text-amber-950 ring-1 ring-amber-400/40'
+                : 'bg-white/80 border-slate-300 text-slate-700'
+            }`}
+          >
+            ⚡ {state.teams.volt.name}: ✔ {stats.volt.correct}
+          </span>
+          <span
+            className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 shadow-xs border transition-all ${
+              teamId === 'ampere'
+                ? 'bg-cyan-100 border-cyan-400 text-cyan-950 ring-1 ring-cyan-400/40'
+                : 'bg-white/80 border-slate-300 text-slate-700'
+            }`}
+          >
+            ⚡ {state.teams.ampere.name}: ✔ {stats.ampere.correct}
+          </span>
+          {mult > 1 && (
+            <span className="rounded-full bg-amber-500 px-2 py-0.5 font-display text-[11px] font-black text-white shadow-xs animate-bounce">
+              🔥 ×{mult}
             </span>
-            <span
-              className={`flex items-center gap-1 rounded-full px-3 py-1 shadow-xs border transition-all ${
-                teamId === 'ampere'
-                  ? 'bg-cyan-100 border-cyan-400 text-cyan-950 ring-2 ring-cyan-400/40'
-                  : 'bg-white/80 border-slate-300 text-slate-700'
-              }`}
-            >
-              ⚡ {state.teams.ampere.name}: ✔ {stats.ampere.correct} ✘ {stats.ampere.wrong}
-            </span>
-            {mult > 1 && (
-              <span className="rounded-full bg-amber-500 px-2.5 py-1 font-display text-xs font-black text-white shadow-sm animate-bounce">
-                🔥 ×{mult} COMBO
-              </span>
-            )}
-          </div>
-          <div className="rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white shadow-xs">
-            Item {index + 1}/{TOTAL_ITEMS}
-          </div>
+          )}
+          <span className="rounded-full bg-slate-900 px-2.5 py-0.5 text-xs font-black text-white shadow-xs">
+            {index + 1}/{TOTAL_ITEMS}
+          </span>
           <Timer remaining={remaining} total={CHANCE_SECONDS} />
         </div>
       }
     >
-      <div className="mx-auto flex h-full max-w-3xl flex-col justify-center gap-3.5">
+      <div className="mx-auto flex min-h-full max-w-2xl flex-col justify-center py-1 gap-2.5">
         {/* Conductor Button */}
         <button
           onClick={() => answer(true)}
           disabled={!!feedback}
-          className="clay-card group border-3 border-emerald-500 bg-emerald-100/90 py-4 transition-all hover:scale-[1.01] hover:bg-emerald-200 disabled:opacity-60 cursor-pointer text-center shadow-md"
+          className="clay-card group border-2 border-emerald-500 bg-emerald-100/90 py-2.5 px-4 transition-all hover:scale-[1.01] hover:bg-emerald-200 disabled:opacity-60 cursor-pointer text-center shadow-sm"
         >
-          <div className="font-display text-3xl font-black text-emerald-950">▲ CONDUCTOR</div>
-          <div className="text-sm font-black text-emerald-900 mt-0.5">Lets electrical current flow through</div>
+          <div className="font-display text-2xl font-black text-emerald-950 leading-tight">▲ CONDUCTOR</div>
+          <div className="text-xs font-black text-emerald-900">Lets electrical current flow through</div>
         </button>
 
         {/* Central Material Test Card */}
-        <div className="clay-chassis relative grid place-items-center bg-white py-8 px-6 shadow-2xl border-2 border-slate-200">
-          <div className="text-8xl drop-shadow-sm">{material.icon}</div>
-          <div className="mt-3 font-display text-5xl font-black text-slate-950">{material.name}</div>
+        <div className="clay-chassis relative grid place-items-center bg-white py-4 md:py-5 px-6 shadow-xl border-2 border-slate-200">
+          <div className="text-6xl md:text-7xl drop-shadow-sm">{material.icon}</div>
+          <div className="mt-1 font-display text-3xl md:text-4xl font-black text-slate-950 leading-tight">{material.name}</div>
 
           {revealed && !feedback && (
-            <div className="pop-in mt-4 flex items-center gap-3 rounded-2xl border-2 border-slate-300 bg-slate-100 px-6 py-3 shadow-sm">
-              <span className="text-3xl">{material.conductor ? '💡' : '🌑'}</span>
-              <span className="text-base font-bold text-slate-900">
+            <div className="pop-in mt-2.5 flex items-center gap-2.5 rounded-xl border border-slate-300 bg-slate-100 px-4 py-1.5 shadow-xs">
+              <span className="text-2xl">{material.conductor ? '💡' : '🌑'}</span>
+              <span className="text-xs md:text-sm font-bold text-slate-900">
                 Bench Test: The test bulb{' '}
                 <strong className={material.conductor ? 'text-emerald-700 font-black' : 'text-rose-700 font-black'}>
                   {material.conductor ? 'lights up bright!' : 'stays completely dark.'}
@@ -346,7 +344,7 @@ export function SortingBelt() {
           {!revealed && !feedback && (
             <button
               onClick={testIt}
-              className="clay-btn mt-4 bg-slate-900 hover:bg-slate-800 border-2 border-slate-900 px-5 py-2.5 text-xs font-black text-white cursor-pointer shadow-md"
+              className="clay-btn mt-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-900 px-4 py-1.5 text-xs font-black text-white cursor-pointer shadow-sm"
             >
               🔬 Test on Bench Circuit (−{TEST_COST_SECONDS}s)
             </button>
@@ -355,7 +353,7 @@ export function SortingBelt() {
           {/* Opaque Explanation Overlay */}
           {feedback && (
             <div
-              className={`pop-in absolute inset-0 grid place-items-center rounded-3xl border-4 bg-white p-6 text-center shadow-2xl z-20 ${
+              className={`pop-in absolute inset-0 grid place-items-center rounded-3xl border-4 bg-white p-4 text-center shadow-2xl z-20 ${
                 feedback.ok ? 'border-emerald-500' : 'border-rose-500'
               }`}
             >
@@ -363,15 +361,15 @@ export function SortingBelt() {
                 <img
                   src={feedback.ok ? '/assets/rick_and_morty/rick_experiment.jpg' : '/assets/rick_and_morty/morty_shock.jpg'}
                   alt="Reaction"
-                  className="h-20 w-20 rounded-2xl object-cover border-2 border-slate-900 shadow-md mb-2"
+                  className="h-16 w-16 rounded-xl object-cover border border-slate-900 shadow-xs mb-1.5"
                 />
-                <div className="font-display text-4xl font-black text-slate-950">
+                <div className="font-display text-2xl md:text-3xl font-black text-slate-950">
                   {feedback.timeout ? '⚠️ Time Up!' : feedback.ok ? '✔ Correct!' : '✘ Not quite!'} —{' '}
                   <span className={feedback.material.conductor ? 'text-emerald-700' : 'text-amber-700'}>
                     {feedback.material.conductor ? 'CONDUCTOR' : 'INSULATOR'}
                   </span>
                 </div>
-                <p className="mx-auto mt-2 max-w-md text-base font-black text-slate-900">
+                <p className="mx-auto mt-1 max-w-md text-xs md:text-sm font-black text-slate-900">
                   {feedback.material.why}
                 </p>
               </div>
@@ -383,24 +381,24 @@ export function SortingBelt() {
         <button
           onClick={() => answer(false)}
           disabled={!!feedback}
-          className="clay-card group border-3 border-amber-500 bg-amber-100/90 py-4 transition-all hover:scale-[1.01] hover:bg-amber-200 disabled:opacity-60 cursor-pointer text-center shadow-md"
+          className="clay-card group border-2 border-amber-500 bg-amber-100/90 py-2.5 px-4 transition-all hover:scale-[1.01] hover:bg-amber-200 disabled:opacity-60 cursor-pointer text-center shadow-sm"
         >
-          <div className="font-display text-3xl font-black text-amber-950">▼ INSULATOR</div>
-          <div className="text-sm font-black text-amber-900 mt-0.5">Blocks electrical current from passing</div>
+          <div className="font-display text-2xl font-black text-amber-950 leading-tight">▼ INSULATOR</div>
+          <div className="text-xs font-black text-amber-900">Blocks electrical current from passing</div>
         </button>
 
         <div
-          className={`text-center text-sm font-black py-2.5 px-6 rounded-full border-2 mx-auto w-fit shadow-md transition-all ${
+          className={`text-center text-xs md:text-sm font-black py-1.5 px-5 rounded-full border-2 mx-auto w-fit shadow-xs transition-all ${
             teamId === 'volt'
               ? 'border-amber-400 bg-amber-50/95 text-amber-950'
               : 'border-cyan-400 bg-cyan-50/95 text-cyan-950'
           }`}
         >
           <span>Chance {index + 1} of {TOTAL_ITEMS}: </span>
-          <span style={{ color: theme.accent }} className="font-display font-black text-base uppercase">
+          <span style={{ color: theme.accent }} className="font-display font-black uppercase">
             ⚡ {state.teams[teamId].name}'s Turn
           </span>{' '}
-          <span className="text-slate-600 font-bold ml-1">• Press [↑] for Conductor or [↓] for Insulator</span>
+          <span className="text-slate-600 font-bold ml-1">• [↑] Conductor · [↓] Insulator</span>
         </div>
       </div>
     </RoundShell>
