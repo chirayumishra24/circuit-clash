@@ -255,8 +255,8 @@ export function LightningRound() {
           </div>
         }
       >
-        <div className="mx-auto flex h-full max-w-3xl flex-col justify-center">
-          <div className="clay-chassis p-8 bg-white shadow-2xl flex flex-col gap-4">
+        <div className="mx-auto flex min-h-full max-w-3xl flex-col py-2">
+          <div className="clay-chassis my-auto p-5 md:p-7 bg-white shadow-2xl flex flex-col gap-3.5">
             {/* Header Stage & Turn Status */}
             <div className="flex flex-col items-center justify-center gap-1.5 text-center">
               {phase === 'question' && (
@@ -418,25 +418,25 @@ export function LightningRound() {
     const ready = phase === 'wager'
     return (
       <RoundShell roundId="lightning">
-        <div className="grid h-full place-items-center py-6">
-          <div className="clay-chassis pop-in w-full max-w-3xl p-8 text-center bg-white shadow-2xl">
+        <div className="mx-auto flex min-h-full max-w-3xl flex-col py-3">
+          <div className="clay-chassis pop-in my-auto w-full p-6 md:p-8 text-center bg-white shadow-2xl">
             <div className="text-6xl animate-bounce">🎲</div>
-            <h3 className="mt-3 font-display text-4xl font-black text-slate-900">The Final Charge</h3>
-            <p className="mt-2 text-base font-bold text-slate-700">
+            <h3 className="mt-3 font-display text-3xl md:text-4xl font-black text-slate-900">The Final Charge</h3>
+            <p className="mt-2 text-sm md:text-base font-bold text-slate-700">
               Wager any portion of your team's stored battery points on one final challenge question!
             </p>
 
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
               {TEAM_IDS.map((id) => {
                 const team = state.teams[id]
                 const isVolt = id === 'volt'
                 return (
                   <div
                     key={id}
-                    className={`rounded-3xl p-5 border-2 ${isVolt ? 'clay-card-volt' : 'clay-card-amp'}`}
+                    className={`rounded-3xl p-4 md:p-5 border-2 ${isVolt ? 'clay-card-volt' : 'clay-card-amp'}`}
                   >
                     <div
-                      className="font-display text-xl font-black"
+                      className="font-display text-lg md:text-xl font-black"
                       style={{ color: isVolt ? '#78350f' : '#164e63' }}
                     >
                       {team.name}
@@ -444,7 +444,7 @@ export function LightningRound() {
                     <div className="text-xs font-bold uppercase tracking-widest text-slate-600">
                       Battery Charge: {team.score} PTS
                     </div>
-                    <div className="mt-3 font-display text-4xl font-black tabular-nums text-slate-900">
+                    <div className="mt-2 font-display text-3xl md:text-4xl font-black tabular-nums text-slate-900">
                       {wagers[id]} <span className="text-sm font-bold">PTS</span>
                     </div>
                     <input
@@ -469,7 +469,7 @@ export function LightningRound() {
                               [id]: Math.round((team.score * f) / 25) * 25,
                             }))
                           }
-                          className="clay-btn bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1 text-xs font-black text-slate-800"
+                          className="clay-btn bg-white hover:bg-slate-50 border border-slate-200 px-3 py-1 text-xs font-black text-slate-800 cursor-pointer"
                         >
                           {f === 0 ? 'None' : f === 1 ? 'All In' : `${f * 100}%`}
                         </button>
@@ -480,7 +480,7 @@ export function LightningRound() {
               })}
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               {!ready ? (
                 <Button size="lg" onClick={() => setPhase('wager')}>
                   Lock In Wagers 🔒
@@ -503,41 +503,41 @@ export function LightningRound() {
 
     return (
       <RoundShell roundId="lightning">
-        <div className="mx-auto flex h-full max-w-3xl flex-col justify-center">
-          <div className="clay-chassis p-8 bg-white shadow-2xl flex flex-col gap-4">
+        <div className="mx-auto flex min-h-full max-w-3xl flex-col py-2">
+          <div className="clay-chassis my-auto p-5 md:p-6 bg-white shadow-2xl flex flex-col gap-3">
             <div className="text-center">
-              <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-amber-800">
+              <span className="rounded-full bg-amber-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-800">
                 ⚡ FINAL CHARGE
               </span>
-              <h3 className="mt-3 font-display text-2xl font-black text-slate-900 leading-snug">
+              <h3 className="mt-1 font-display text-lg md:text-xl font-black text-slate-900 leading-snug">
                 {finalQuestion.prompt}
               </h3>
             </div>
 
-            <div className="mt-2 grid gap-3">
+            <div className="mt-1 grid gap-2 sm:grid-cols-2">
               {finalQuestion.options.map((opt, i) => {
                 const isAnswer = i === finalQuestion.answer
                 const chosenBy = TEAM_IDS.filter((id) => finalPicks[id] === i)
                 return (
                   <div
                     key={i}
-                    className={`clay-card flex items-center justify-between border-2 p-4 ${
+                    className={`clay-card flex items-center justify-between border-2 p-3 transition-all ${
                       revealing && isAnswer
-                        ? 'border-emerald-500 bg-emerald-50 shadow-md'
+                        ? 'border-emerald-500 bg-emerald-50 shadow-md ring-2 ring-emerald-500/50'
                         : 'border-slate-200 bg-white'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="font-display font-black text-amber-700">
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-display font-black text-amber-700 text-sm shrink-0">
                         [{String.fromCharCode(65 + i)}]
                       </span>
-                      <span className="font-bold text-slate-900 text-base">{opt}</span>
+                      <span className="font-bold text-slate-900 text-xs md:text-sm leading-snug">{opt}</span>
                     </div>
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1 shrink-0 ml-1">
                       {chosenBy.map((id) => (
                         <span
                           key={id}
-                          className={`rounded-xl px-2.5 py-1 text-xs font-black text-white shadow-sm ${
+                          className={`rounded-lg px-2 py-0.5 text-[10px] font-black text-white shadow-xs ${
                             id === 'volt' ? 'bg-amber-500' : 'bg-cyan-600'
                           }`}
                         >
@@ -551,54 +551,79 @@ export function LightningRound() {
             </div>
 
             {!revealing && (
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              <div className="mt-1 grid gap-2.5 sm:grid-cols-2">
                 {TEAM_IDS.map((id) => (
                   <div
                     key={id}
-                    className={`rounded-2xl border-2 p-4 text-center ${
+                    className={`rounded-2xl border-2 p-3 text-center transition-all ${
                       id === 'volt' ? 'clay-card-volt' : 'clay-card-amp'
                     }`}
                   >
-                    <div className="font-display text-sm font-black" style={{ color: id === 'volt' ? '#78350f' : '#164e63' }}>
-                      {state.teams[id].name} · Bet: {wagers[id]} PTS
+                    <div className="flex items-center justify-between px-1">
+                      <span
+                        className="font-display text-xs md:text-sm font-black"
+                        style={{ color: id === 'volt' ? '#78350f' : '#164e63' }}
+                      >
+                        ⚡ {state.teams[id].name}
+                      </span>
+                      <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-black text-slate-800 shadow-xs">
+                        Bet: {wagers[id]} PTS
+                      </span>
                     </div>
-                    <div className="mt-3 flex justify-center gap-2">
-                      {finalQuestion.options.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => submitFinal(id, i)}
-                          disabled={wagers[id] === 0}
-                          className={`clay-btn h-10 w-10 text-sm font-black transition disabled:opacity-40 ${
-                            finalPicks[id] === i
-                              ? 'bg-slate-900 text-white shadow-md scale-105'
-                              : 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-100'
-                          }`}
-                        >
-                          {String.fromCharCode(65 + i)}
-                        </button>
-                      ))}
+                    <div className="mt-2 flex justify-center gap-2">
+                      {finalQuestion.options.map((_, i) => {
+                        const letter = String.fromCharCode(65 + i)
+                        const isSelected = finalPicks[id] === i
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => submitFinal(id, i)}
+                            disabled={wagers[id] === 0}
+                            className={`clay-btn h-9 w-11 rounded-xl text-sm font-black transition cursor-pointer disabled:opacity-40 ${
+                              isSelected
+                                ? id === 'volt'
+                                  ? 'bg-amber-500 text-white shadow-md scale-105 ring-2 ring-amber-600'
+                                  : 'bg-cyan-600 text-white shadow-md scale-105 ring-2 ring-cyan-700'
+                                : 'bg-white border border-slate-300 text-slate-800 hover:bg-slate-100'
+                            }`}
+                          >
+                            {letter}
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="mt-4 text-center">
+            <div className="mt-2 text-center pb-1">
               {revealing ? (
-                <div className="rise-in">
-                  <p className="mx-auto max-w-xl text-base font-bold text-slate-800">
-                    💡 {finalQuestion.explain}
-                  </p>
+                <div className="rise-in flex flex-col items-center">
+                  <div className="flex items-center gap-3 max-w-xl text-left bg-slate-50 p-3 rounded-2xl border border-slate-200 shadow-xs mb-3">
+                    <span className="text-2xl shrink-0">💡</span>
+                    <p className="text-xs md:text-sm font-bold text-slate-800 leading-snug">
+                      {finalQuestion.explain}
+                    </p>
+                  </div>
                   <Button
                     size="lg"
-                    className="mt-5"
+                    className="shadow-xl"
                     onClick={() => dispatch({ type: 'COMPLETE_ROUND', round: 'lightning' })}
                   >
                     🏆 View Championship Results →
                   </Button>
                 </div>
               ) : (
-                <Button size="lg" onClick={scoreFinal} disabled={!bothIn}>
+                <Button
+                  size="lg"
+                  onClick={scoreFinal}
+                  disabled={!bothIn}
+                  className={`shadow-lg transition-all ${
+                    bothIn ? 'scale-105 ring-4 ring-emerald-400/40 animate-pulse' : 'opacity-70'
+                  }`}
+                >
                   {bothIn ? 'Lock In & Reveal Champion! ⚡' : 'Both teams must pick an answer'}
                 </Button>
               )}
