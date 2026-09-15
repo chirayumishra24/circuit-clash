@@ -40,6 +40,15 @@ function TeamPod({ teamId, active }: { teamId: TeamId; active: boolean }) {
           : 'opacity-90 hover:opacity-100'
       }`}
     >
+      {active && (
+        <span
+          className={`absolute -top-3 left-6 rounded-full px-3 py-0.5 font-display text-[10px] font-black uppercase tracking-wider text-white shadow-md animate-bounce z-10 ${
+            isVolt ? 'bg-amber-500 shadow-amber-500/50' : 'bg-cyan-600 shadow-cyan-500/50'
+          }`}
+        >
+          ⚡ {isVolt ? 'TEAM A TURN' : 'TEAM B TURN'}
+        </span>
+      )}
       <div className="flex items-center justify-between gap-4">
         {/* Team Avatar Badge & Name */}
         <div className="flex items-center gap-3.5 min-w-0">
@@ -152,8 +161,20 @@ export function Scoreboard({ activeTeam }: { activeTeam?: TeamId | null }) {
             VS
           </div>
           <div className="mt-0.5 flex gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-[0_0_4px_rgba(245,158,11,0.8)]" />
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-500 shadow-[0_0_4px_rgba(6,182,212,0.8)]" />
+            <span
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeTeam === 'volt'
+                  ? 'w-4 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)]'
+                  : 'w-1.5 bg-slate-300'
+              }`}
+            />
+            <span
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                activeTeam === 'ampere'
+                  ? 'w-4 bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,1)]'
+                  : 'w-1.5 bg-slate-300'
+              }`}
+            />
           </div>
         </div>
       </div>
