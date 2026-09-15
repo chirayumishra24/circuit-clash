@@ -41,7 +41,7 @@ export function BuildBattle() {
   const [circuit, setCircuit] = useState<Circuit>(emptyCircuit)
   const [verdict, setVerdict] = useState<{ ok: boolean; reason: string } | null>(null)
   const [results, setResults] = useState<Partial<Record<TeamId, TurnResult>>>({})
-  const nextId = useRef(1)
+  const nextId = useRef(2)
 
   const brief = BRIEFS[turn % BRIEFS.length]
   const ownerId = TEAM_IDS[turn]
