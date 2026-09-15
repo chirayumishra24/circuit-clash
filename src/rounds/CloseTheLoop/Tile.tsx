@@ -94,8 +94,8 @@ export function Tile({ cell, live, hinted, onClick, disabled }: Props) {
           <circle cx={MID} cy={MID} r={8} fill={live ? '#16a34a' : '#64748b'} />
         )}
 
-        {/* Terminal edge connection rivets */}
-        {sides.map((d) => {
+        {/* Terminal edge connection rivets — skip on bulb/source (their icons are enough) */}
+        {cell.type !== 'bulb' && cell.type !== 'source' && sides.map((d) => {
           const cx = d === 1 ? SIZE - 3 : d === 3 ? 3 : MID
           const cy = d === 2 ? SIZE - 3 : d === 0 ? 3 : MID
           return (
